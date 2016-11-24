@@ -1,0 +1,8 @@
+ext {
+    user = 'xbib'
+    projectName = 'cql'
+    projectDescription = 'Contextual Query Language compiler for Java'
+    scmUrl = 'https://github.com/xbib/cql'
+    scmConnection = 'scm:git:git://github.com/xbib/cql.git'
+    scmDeveloperConnection = 'scm:git:git://github.com/xbib/cql.git'
+}
