@@ -128,7 +128,7 @@ public class FilterGenerator implements Visitor {
                         case ALL: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            boolean phrase = arg2 instanceof Token && ((Token) arg2).isProtected();
+                            boolean phrase = arg2 instanceof Token && ((Token) arg2).isQuoted();
                             if (phrase) {
                                 builder.startArray("and");
                                 QuotedStringTokenizer qst = new QuotedStringTokenizer(value);
@@ -144,7 +144,7 @@ public class FilterGenerator implements Visitor {
                             break;
                         }
                         case ANY: {
-                            boolean phrase = arg2 instanceof Token && ((Token) arg2).isProtected();
+                            boolean phrase = arg2 instanceof Token && ((Token) arg2).isQuoted();
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             if (phrase) {
