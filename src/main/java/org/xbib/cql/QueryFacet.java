@@ -2,6 +2,7 @@ package org.xbib.cql;
 
 /**
  * Query facet.
+ * @param <V> the facet value type parameter
  */
 public interface QueryFacet<V> extends QueryOption<V> {
     /**

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Build facet from abstract syntax tree
+ * Build facet from abstract syntax tree.
  */
 public class FacetsGenerator implements Visitor {
 
@@ -124,12 +124,11 @@ public class FacetsGenerator implements Visitor {
             }
         }
         builder.startObject();
-
         for (String index : facetMap.keySet()) {
             if ("*".equals(index)) {
                 continue;
             }
-            // TODO range aggregations etc.
+            // TODO(jprante) range aggregations etc.
             String facetType = "terms";
             Integer size = facetMap.get(index);
             builder.field(index)

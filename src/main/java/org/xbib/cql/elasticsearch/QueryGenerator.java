@@ -14,7 +14,7 @@ import org.xbib.cql.elasticsearch.ast.Token;
 import java.io.IOException;
 
 /**
- * Build Elasticsearch query from abstract syntax tree
+ * Build Elasticsearch query from abstract syntax tree.
  */
 public class QueryGenerator implements Visitor {
 
@@ -258,10 +258,12 @@ public class QueryGenerator implements Visitor {
                             String to = null;
                             if (tok2 != null) {
                                 if (!tok2.isQuoted()) {
-                                    throw new IllegalArgumentException("range within: unable to derive range from a non-phrase: " + value);
+                                    throw new IllegalArgumentException("range within: unable to derive range "
+                                            + "from a non-phrase: " + value);
                                 }
                                 if (tok2.getStringList().size() != 2) {
-                                    throw new IllegalArgumentException("range within: unable to derive range from a phrase of length not equals to 2: " + tok2.getStringList());
+                                    throw new IllegalArgumentException("range within: unable to derive range "
+                                            + "from a phrase of length not equals to 2: " + tok2.getStringList());
                                 }
                                 from = tok2.getStringList().get(0);
                                 to = tok2.getStringList().get(1);
@@ -361,7 +363,8 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         default:
-                            throw new IllegalArgumentException("unable to translate operator while building elasticsearch query: " + op);
+                            throw new IllegalArgumentException("unable to translate operator while "
+                                    + "building elasticsearch query: " + op);
                     }
                     break;
                 }
@@ -370,5 +373,4 @@ public class QueryGenerator implements Visitor {
             throw new SyntaxException("internal error while building elasticsearch query", e);
         }
     }
-
 }

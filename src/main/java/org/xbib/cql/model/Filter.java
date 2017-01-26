@@ -1,7 +1,7 @@
 package org.xbib.cql.model;
 
-import org.xbib.cql.QueryFilter;
 import org.xbib.cql.Comparitor;
+import org.xbib.cql.QueryFilter;
 
 /**
  * Filter.

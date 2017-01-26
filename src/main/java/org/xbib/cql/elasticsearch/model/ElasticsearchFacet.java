@@ -9,6 +9,9 @@ import org.xbib.cql.QueryFacet;
  */
 public final class ElasticsearchFacet<V> implements QueryFacet<V>, Comparable<ElasticsearchFacet<V>> {
 
+    /**
+     * Types of Elasticsearch facets.
+     */
     public enum Type {
         TERMS,
         RANGE,
@@ -21,7 +24,7 @@ public final class ElasticsearchFacet<V> implements QueryFacet<V>, Comparable<El
         GEO_DISTANCE
     }
 
-    public static int DEFAULT_FACET_SIZE = 10;
+    public static final int DEFAULT_FACET_SIZE = 10;
 
     private Type type;
 

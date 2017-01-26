@@ -37,7 +37,7 @@ public enum Comparitor {
     }
 
     /**
-     * Map token to operator
+     * Map token to operator.
      *
      * @param token the token
      * @param op    the operator

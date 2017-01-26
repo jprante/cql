@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Stack;
 
 /**
- * Build sort in Elasticsearch JSON syntax from abstract syntax tree
+ * Build sort in Elasticsearch JSON syntax from abstract syntax tree.
  */
 public class SortGenerator implements Visitor {
 

@@ -3,7 +3,7 @@ package org.xbib.cql.elasticsearch.ast;
 import org.xbib.cql.elasticsearch.Visitor;
 
 /**
- * This node class is the base class for the Elasticsearch Query Lange abstract syntax tree
+ * This node class is the base class for the Elasticsearch Query Lange abstract syntax tree.
  */
 public interface Node {
 
@@ -12,5 +12,4 @@ public interface Node {
     boolean isVisible();
 
     TokenType getType();
-
 }

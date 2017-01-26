@@ -7,8 +7,11 @@ import java.util.TreeSet;
 
 /**
  * Facet breadcrumb trail.
+ * @param <V> the facet value parameter
  */
-public class FacetBreadcrumbTrail extends TreeSet<Facet> {
+public class FacetBreadcrumbTrail<V> extends TreeSet<Facet<V>> {
+
+    private static final long serialVersionUID = 6268000598739081048L;
 
     @Override
     public String toString() {
@@ -20,7 +23,7 @@ public class FacetBreadcrumbTrail extends TreeSet<Facet> {
         if (isEmpty()) {
             return sb.toString();
         }
-        Iterator<Facet> it = iterator();
+        Iterator<Facet<V>> it = iterator();
         if (it.hasNext()) {
             sb.append(it.next().toCQL());
         }

@@ -4,6 +4,9 @@ package org.xbib.cql;
  * CQL Syntax exception.
  */
 public class SyntaxException extends RuntimeException {
+
+    private static final long serialVersionUID = -9028694755857782309L;
+
     /**
      * Creates a new SyntaxException object.
      *

@@ -3,7 +3,7 @@ package org.xbib.cql.elasticsearch.ast;
 import org.xbib.cql.elasticsearch.Visitor;
 
 /**
- * Elasticsearch expression
+ * Elasticsearch expression.
  */
 public class Expression implements Node {
 

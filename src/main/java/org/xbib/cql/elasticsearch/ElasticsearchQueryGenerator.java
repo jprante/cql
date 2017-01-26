@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.Stack;
 
 /**
- * Generate Elasticsearch QueryModel DSL from CQL abstract syntax tree
+ * Generate Elasticsearch QueryModel DSL from CQL abstract syntax tree.
  */
 public class ElasticsearchQueryGenerator implements Visitor {
 

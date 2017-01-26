@@ -9,8 +9,11 @@ import java.util.TreeSet;
  * An Option breadcrumb trail is a trail of attributes (key/value pairs).
  * There is no interdependency between attributes; all values are allowed,
  * even if they interfere with each other, the trail does not resolve it.
+ * @param <V> the option value parameter
  */
-public class OptionBreadcrumbTrail extends TreeSet<Option> {
+public class OptionBreadcrumbTrail<V> extends TreeSet<Option<V>> {
+
+    private static final long serialVersionUID = -3426025113354994279L;
 
     @Override
     public String toString() {
@@ -27,7 +30,7 @@ public class OptionBreadcrumbTrail extends TreeSet<Option> {
         if (isEmpty()) {
             return sb.toString();
         }
-        Iterator<Option> it = iterator();
+        Iterator<Option<V>> it = iterator();
         if (it.hasNext()) {
             sb.append(it.next().toCQL());
         }

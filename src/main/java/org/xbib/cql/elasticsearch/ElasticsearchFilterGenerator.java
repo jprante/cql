@@ -1,7 +1,6 @@
 package org.xbib.cql.elasticsearch;
 
 import org.xbib.content.XContentBuilder;
-import org.xbib.cql.util.DateUtil;
 import org.xbib.cql.BooleanGroup;
 import org.xbib.cql.BooleanOperator;
 import org.xbib.cql.Comparitor;
@@ -28,6 +27,7 @@ import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
 import org.xbib.cql.elasticsearch.ast.TokenType;
 import org.xbib.cql.elasticsearch.model.ElasticsearchQueryModel;
+import org.xbib.cql.util.DateUtil;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -60,13 +60,15 @@ public class ElasticsearchFilterGenerator implements Visitor {
 
     public void addOrFilter(String filterKey, Collection<String> filterValues) {
         for (String value : filterValues) {
-            model.addDisjunctiveFilter(filterKey, new Expression(Operator.OR_FILTER, new Name(filterKey), new Token(value)), Operator.OR);
+            model.addDisjunctiveFilter(filterKey, new Expression(Operator.OR_FILTER, new Name(filterKey),
+                    new Token(value)), Operator.OR);
         }
     }
 
     public void addAndFilter(String filterKey, Collection<String> filterValues) {
         for (String value : filterValues) {
-            model.addConjunctiveFilter(filterKey, new Expression(Operator.AND_FILTER, new Name(filterKey), new Token(value)), Operator.AND);
+            model.addConjunctiveFilter(filterKey, new Expression(Operator.AND_FILTER, new Name(filterKey),
+                    new Token(value)), Operator.AND);
         }
     }
 

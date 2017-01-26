@@ -50,7 +50,7 @@ public class Term extends AbstractNode {
 
     /**
      * Set value, useful for inline replacements
-     * in spellcheck suggestions
+     * in spellcheck suggestions.
      *
      * @param value the value
      */

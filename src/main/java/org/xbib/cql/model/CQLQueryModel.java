@@ -65,28 +65,28 @@ public final class CQLQueryModel {
     /**
      * breadcrumb trail for facets.
      */
-    private FacetBreadcrumbTrail facetTrail;
+    private FacetBreadcrumbTrail<Term> facetTrail;
 
     /**
      * breadcrumb trail for conjunctive filters.
      */
-    private FilterBreadcrumbTrail conjunctivefilterTrail;
+    private FilterBreadcrumbTrail<AbstractNode> conjunctivefilterTrail;
 
     /**
      * breadcrumb trail for disjunctive filters.
      */
-    private FilterBreadcrumbTrail disjunctivefilterTrail;
+    private FilterBreadcrumbTrail<AbstractNode> disjunctivefilterTrail;
 
     /**
      * breadcrumb trail for options.
      */
-    private OptionBreadcrumbTrail optionTrail;
+    private OptionBreadcrumbTrail<Term> optionTrail;
 
     public CQLQueryModel() {
-        this.facetTrail = new FacetBreadcrumbTrail();
-        this.conjunctivefilterTrail = new FilterBreadcrumbTrail(BooleanOperator.AND);
-        this.disjunctivefilterTrail = new FilterBreadcrumbTrail(BooleanOperator.OR);
-        this.optionTrail = new OptionBreadcrumbTrail();
+        this.facetTrail = new FacetBreadcrumbTrail<>();
+        this.conjunctivefilterTrail = new FilterBreadcrumbTrail<>(BooleanOperator.AND);
+        this.disjunctivefilterTrail = new FilterBreadcrumbTrail<>(BooleanOperator.OR);
+        this.optionTrail = new OptionBreadcrumbTrail<>();
     }
 
     public void setQuery(String query) {
@@ -130,15 +130,15 @@ public final class CQLQueryModel {
         disjunctivefilterTrail.remove(filter);
     }
 
-    public void addOption(Option<?> option) {
+    public void addOption(Option<Term> option) {
         optionTrail.add(option);
     }
 
-    public void removeOption(Option<?> option) {
+    public void removeOption(Option<Term> option) {
         optionTrail.remove(option);
     }
 
-    public FacetBreadcrumbTrail getFacetTrail() {
+    public FacetBreadcrumbTrail<Term> getFacetTrail() {
         return facetTrail;
     }
 
@@ -160,7 +160,7 @@ public final class CQLQueryModel {
      *
      * @return the option breadcrumb trail
      */
-    public OptionBreadcrumbTrail getOptionTrail() {
+    public OptionBreadcrumbTrail<Term> getOptionTrail() {
         return optionTrail;
     }
 
@@ -197,7 +197,7 @@ public final class CQLQueryModel {
     }
 
     /**
-     * Check if this context is the option context
+     * Check if this context is the option context.
      *
      * @param context the context
      * @return true if option context

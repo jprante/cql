@@ -8,9 +8,11 @@ import java.util.TreeSet;
 
 /**
  * Filter breadcrumbs.
+ * @param <V> the filter value parameter
  */
-public class FilterBreadcrumbTrail extends TreeSet<Filter> {
+public class FilterBreadcrumbTrail<V> extends TreeSet<Filter<V>> {
 
+    private static final long serialVersionUID = 3150916290466088839L;
     private BooleanOperator op;
 
     public FilterBreadcrumbTrail(BooleanOperator op) {
@@ -31,7 +33,7 @@ public class FilterBreadcrumbTrail extends TreeSet<Filter> {
         if (op == BooleanOperator.OR && size() > 1) {
             sb.append('(');
         }
-        Iterator<Filter> it = this.iterator();
+        Iterator<Filter<V>> it = this.iterator();
         sb.append(it.next().toCQL());
         while (it.hasNext()) {
             sb.append(' ').append(op).append(' ').append(it.next().toCQL());

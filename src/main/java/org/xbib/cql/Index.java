@@ -31,7 +31,7 @@ public class Index extends AbstractNode {
     }
 
     /**
-     * Get the name of the index
+     * Get the name of the index.
      *
      * @return the name of the index
      */

@@ -3,7 +3,7 @@ package org.xbib.cql.elasticsearch.ast;
 import org.xbib.cql.elasticsearch.Visitor;
 
 /**
- * This is a modifier node for Elasticsearch query language
+ * This is a modifier node for Elasticsearch query language.
  */
 public class Modifier implements Node {
 

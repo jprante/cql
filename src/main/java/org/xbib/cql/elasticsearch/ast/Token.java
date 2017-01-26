@@ -20,10 +20,7 @@ import java.util.stream.StreamSupport;
  */
 public class Token implements Node {
 
-    public enum TokenClass {
-
-        NORMAL, ALL, WILDCARD, BOUNDARY, QUOTED
-    }
+    private static final Pattern word = Pattern.compile("[\\P{IsWord}]");
 
     private TokenType type;
 
@@ -209,5 +206,11 @@ public class Token implements Node {
         }
     }
 
-    private final static Pattern word = Pattern.compile("[\\P{IsWord}]");
+    /**
+     * The token classes.
+     */
+    public enum TokenClass {
+
+        NORMAL, ALL, WILDCARD, BOUNDARY, QUOTED
+    }
 }

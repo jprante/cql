@@ -3,7 +3,7 @@ package org.xbib.cql.elasticsearch.ast;
 import org.xbib.cql.elasticsearch.Visitor;
 
 /**
- * Elasticsearch operators
+ * Elasticsearch operators.
  */
 public enum Operator implements Node {
     EQUALS(2),

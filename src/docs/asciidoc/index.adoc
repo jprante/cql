@@ -1,0 +1,20 @@
+= Contextual Query Language compiler for Java
+Jörg Prante
+Version 1.0
+:sectnums:
+:toc: preamble
+:toclevels: 4
+:!toc-title: Content
+:experimental:
+:description: Contextual Query Language compiler for Java
+:keywords: Java, Contextual Query Language, CQL
+:icons: font
+
+== Javadoc
+
+The Javadoc can be found link:javadoc[here].
+
+== Gradle test report
+
+The Gradle test report can be found link:test[here].
+

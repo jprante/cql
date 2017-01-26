@@ -15,7 +15,7 @@ import org.xbib.cql.util.QuotedStringTokenizer;
 import java.io.IOException;
 
 /**
- * Build query filter in Elasticsearch JSON syntax from abstract syntax tree
+ * Build query filter in Elasticsearch JSON syntax from abstract syntax tree.
  */
 public class FilterGenerator implements Visitor {
 
@@ -133,7 +133,9 @@ public class FilterGenerator implements Visitor {
                                 builder.startArray("and");
                                 QuotedStringTokenizer qst = new QuotedStringTokenizer(value);
                                 while (qst.hasMoreTokens()) {
-                                    builder.startObject().startObject("term").field(field, qst.nextToken()).endObject().endObject();
+                                    builder.startObject().startObject("term")
+                                            .field(field, qst.nextToken())
+                                            .endObject().endObject();
                                 }
                                 builder.endArray();
                             } else {
@@ -325,7 +327,8 @@ public class FilterGenerator implements Visitor {
                             break;
                         }
                         default:
-                            throw new IllegalArgumentException("unable to translate operator while building elasticsearch query filter: " + op);
+                            throw new IllegalArgumentException("unable to translate operator "
+                                    + "while building elasticsearch query filter: " + op);
                     }
                     break;
                 }
@@ -334,5 +337,4 @@ public class FilterGenerator implements Visitor {
             throw new SyntaxException("internal error while building elasticsearch query filter", e);
         }
     }
-
 }

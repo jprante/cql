@@ -7,6 +7,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ *
+ */
 public class DateUtil {
 
     public static final String ISO_FORMAT_SECONDS = "yyyy-MM-dd'T'HH:mm:ss'Z'";
@@ -38,10 +41,14 @@ public class DateUtil {
      */
     public static final long MILLIS_PER_DAY = 24 * MILLIS_PER_HOUR;
     /**
-     * the date masks
+     * the date masks.
      */
-    private static final String[] DATE_MASKS = {"yyyy-MM-dd'T'HH:mm:ssz", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd",
-            "yyyy"};
+    private static final String[] dateMasks = {
+            "yyyy-MM-dd'T'HH:mm:ssz",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd",
+            "yyyy"
+    };
 
     public static String formatNow() {
         return formatDateISO(new Date());
@@ -295,15 +302,15 @@ public class DateUtil {
             } else if (o instanceof Long) {
                 Long longvalue = (Long) o;
                 String s = Long.toString(longvalue);
-                sdf.applyPattern(DATE_MASKS[3]);
+                sdf.applyPattern(dateMasks[3]);
                 Date d = sdf.parse(s, new ParsePosition(0));
                 if (d != null) {
                     return d;
                 }
             } else if (o instanceof String) {
                 String value = (String) o;
-                for (String DATE_MASK : DATE_MASKS) {
-                    sdf.applyPattern(DATE_MASK);
+                for (String dateMask : dateMasks) {
+                    sdf.applyPattern(dateMask);
                     Date d = sdf.parse(value, new ParsePosition(0));
                     if (d != null) {
                         return d;

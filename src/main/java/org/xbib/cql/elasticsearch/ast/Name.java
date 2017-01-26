@@ -3,7 +3,7 @@ package org.xbib.cql.elasticsearch.ast;
 import org.xbib.cql.elasticsearch.Visitor;
 
 /**
- * A name for Elasticsearch fields
+ * A name for Elasticsearch fields.
  */
 public class Name implements Node {
 

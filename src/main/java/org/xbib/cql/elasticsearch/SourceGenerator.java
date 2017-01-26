@@ -22,11 +22,12 @@ public class SourceGenerator {
         build(query, from, size, null, null);
     }
 
-    public void build(QueryGenerator query, int from, int size, XContentBuilder sort, XContentBuilder facets) throws IOException {
+    public void build(QueryGenerator query, int from, int size, XContentBuilder sort, XContentBuilder facets)
+            throws IOException {
         builder.startObject();
         builder.field("from", from);
         builder.field("size", size);
-        builder.rawField("query", query.getResult().bytes().toBytes() );
+        builder.rawField("query", query.getResult().bytes().toBytes());
         if (sort != null && sort.bytes().length() > 0) {
             builder.rawField("sort", sort.bytes().toBytes());
         }
