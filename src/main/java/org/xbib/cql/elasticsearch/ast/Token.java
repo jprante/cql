@@ -22,7 +22,7 @@ public class Token implements Node {
 
     public enum TokenClass {
 
-        NORMAL, ALL, WILDCARD, BOUNDARY, PROTECTED
+        NORMAL, ALL, WILDCARD, BOUNDARY, QUOTED
     }
 
     private TokenType type;
@@ -60,12 +60,12 @@ public class Token implements Node {
 
         }
         if (this.value != null) {
-            // protected?
+            // quoted?
             if (value.startsWith("\"") && value.endsWith("\"")) {
                 this.stringvalue = value;
                 this.value = value.substring(1, value.length() - 1).replaceAll("\\\\\"", "\"");
                 this.values = parseQuot(this.value);
-                tokenClass.add(TokenClass.PROTECTED);
+                tokenClass.add(TokenClass.QUOTED);
             }
             // wildcard?
             if (this.value.indexOf('*') >= 0 || this.value.indexOf('?') >= 0) {
@@ -182,8 +182,8 @@ public class Token implements Node {
         return sb.toString();
     }
 
-    public boolean isProtected() {
-        return tokenClass.contains(TokenClass.PROTECTED);
+    public boolean isQuoted() {
+        return tokenClass.contains(TokenClass.QUOTED);
     }
 
     public boolean isBoundary() {

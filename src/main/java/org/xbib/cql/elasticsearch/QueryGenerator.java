@@ -197,7 +197,7 @@ public class QueryGenerator implements Visitor {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             if (tok2 != null) {
-                                if (tok2.isProtected()) {
+                                if (tok2.isQuoted()) {
                                     builder.startObject("match_phrase")
                                             .startObject(field)
                                             .field("query", tok2.getString())
@@ -264,7 +264,7 @@ public class QueryGenerator implements Visitor {
                             String from = null;
                             String to = null;
                             if (tok2 != null) {
-                                if (!tok2.isProtected()) {
+                                if (!tok2.isQuoted()) {
                                     throw new IllegalArgumentException("range within: unable to derive range from a non-phrase: " + value);
                                 }
                                 if (tok2.getStringList().size() != 2) {
