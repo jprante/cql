@@ -139,3 +139,7 @@ unix and facet.dc.creator = "on" and facet.dc.subject = "on" and facet.dc.subjec
 unix and facet.dc.date = "on" and facet.dc.subject = "on" and facet.dc.subject = "buckets=20"|unix
 unix and facet.dc.creator = "on" and facet.dc.subject = "on" and facet.dc.subject = "buckets=20"|unix
 cql.allIndexes all "linux;"
+Item.callnumber adj QAP2230
+Item.callnumber adj QAP22*
+Item.callnumber adj "K 32/70 A 10"
+Item.callnumber adj "K 32/70 A*"

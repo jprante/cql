@@ -194,17 +194,10 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         case PHRASE: {
-                            String field = arg1.toString();
-                            String value = arg2 != null ? arg2.toString() : "";
                             if (tok2 != null) {
-                                if (tok2.isQuoted()) {
-                                    builder.startObject("match_phrase")
-                                            .startObject(field)
-                                            .field("query", tok2.getString())
-                                            .field("slop", 0)
-                                            .endObject()
-                                            .endObject();
-                                } else if (tok2.isAll()) {
+                                String field = arg1.toString();
+                                String value = tok2.isQuoted() ? tok2.getString() : arg2.toString();
+                                if (tok2.isAll()) {
                                     builder.startObject("match_all").endObject();
                                 } else if (tok2.isWildcard()) {
                                     builder.startObject("wildcard").field(field, value).endObject();
