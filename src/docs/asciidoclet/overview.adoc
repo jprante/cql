@@ -1,3 +1,3 @@
 = Contextual Query Language for Java
 Jörg Prante
-Version 1.0
+Version 1.1.0

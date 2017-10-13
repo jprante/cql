@@ -1,12 +1,12 @@
-/data
-/work
-/logs
+data
+work
+logs
+build
+target
 /.idea
-/target
 .DS_Store
 *.iml
 /.settings
 /.classpath
 /.project
 /.gradle
-/build
