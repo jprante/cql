@@ -1,4 +1,3 @@
-rootProject.name = 'cql-main'
 
-include 'cql'
+include 'cql-common'
 include 'cql-elasticsearch'

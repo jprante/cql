@@ -1,5 +1,6 @@
 
 task xbibUpload(type: Upload, dependsOn: build) {
+    group = 'publish'
     configuration = configurations.archives
     uploadDescriptor = true
     repositories {
@@ -9,12 +10,45 @@ task xbibUpload(type: Upload, dependsOn: build) {
                 repository(url: uri('sftp://xbib.org/repository')) {
                         authentication(userName: xbibUsername, privateKey: xbibPrivateKey)
                 }
-            }
+                pom.project {
+                    groupId project.group
+                    artifactId project.name
+                    version project.version
+                    name project.name
+                    description projectDescription
+                    packaging 'jar'
+                    inceptionYear '2016'
+                    url scmUrl
+                    organization {
+                        name 'xbib'
+                        url 'http://xbib.org'
+                    }
+                    developers {
+                        developer {
+                            id user
+                            name 'Jörg Prante'
+                            email 'joergprante@gmail.com'
+                            url 'https://github.com/jprante'
+                        }
+                    }
+                    scm {
+                        url scmUrl
+                        connection scmConnection
+                        developerConnection scmDeveloperConnection
+                    }
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                }            }
         }
     }
 }
 
 task sonatypeUpload(type: Upload, dependsOn: build) {
+    group = 'publish'
     configuration = configurations.archives
     uploadDescriptor = true
     repositories {
@@ -64,7 +98,6 @@ task sonatypeUpload(type: Upload, dependsOn: build) {
         }
     }
 }
-
 
 nexusStaging {
     packageGroup = "org.xbib"
