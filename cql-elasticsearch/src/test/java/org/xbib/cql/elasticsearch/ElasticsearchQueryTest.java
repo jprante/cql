@@ -1,7 +1,6 @@
 package org.xbib.cql.elasticsearch;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xbib.cql.CQLParser;
 
 import java.io.IOException;
@@ -9,18 +8,20 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  *
  */
-public class ElasticsearchQueryTest extends Assert {
+class ElasticsearchQueryTest {
 
     @Test
-    public void testValidQueries() throws IOException {
+    void testValidQueries() throws IOException {
         test("queries.txt");
     }
 
     @Test
-    public void testSimpleTermFilter() throws Exception {
+    void testSimpleTermFilter() throws Exception {
         String cql = "Jörg";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -31,7 +32,7 @@ public class ElasticsearchQueryTest extends Assert {
     }
 
     @Test
-    public void testFieldTermFilter() throws Exception {
+    void testFieldTermFilter() throws Exception {
         String cql = "dc.type = electronic";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -42,7 +43,7 @@ public class ElasticsearchQueryTest extends Assert {
     }
 
     @Test
-    public void testDoubleFieldTermFilter() throws Exception {
+    void testDoubleFieldTermFilter() throws Exception {
         String cql = "dc.type = electronic and dc.date = 2013";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -56,7 +57,7 @@ public class ElasticsearchQueryTest extends Assert {
     }
 
     @Test
-    public void testTripleFieldTermFilter() throws Exception {
+    void testTripleFieldTermFilter() throws Exception {
         String cql = "dc.format = online and dc.type = electronic and dc.date = 2013";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -70,7 +71,7 @@ public class ElasticsearchQueryTest extends Assert {
     }
 
     @Test
-    public void testBoost() throws Exception {
+    void testBoost() throws Exception {
         String cql = "Jörg";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -87,7 +88,7 @@ public class ElasticsearchQueryTest extends Assert {
     }
 
     @Test
-    public void testWildcardTerm() throws Exception {
+    void testWildcardTerm() throws Exception {
         String cql = "dc.format = book*";
         CQLParser parser = new CQLParser(cql);
         parser.parse();

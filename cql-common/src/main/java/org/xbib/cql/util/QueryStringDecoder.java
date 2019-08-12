@@ -21,7 +21,7 @@ import java.util.Map;
  * assert decoder.getParameters().get("y").get(0).equals("2");
  * </pre>
  * This decoder can also decode the content of an HTTP POST request whose
- * content type is <tt>application/x-www-form-urlencoded</tt>:
+ * content type is {@code application/x-www-form-urlencoded}:
  * <pre>
  * {@link QueryStringDecoder} decoder = new {@link QueryStringDecoder}("recipient=world&amp;x=1;y=2", false);
  * </pre>

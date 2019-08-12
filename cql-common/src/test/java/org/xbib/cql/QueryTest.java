@@ -1,20 +1,21 @@
 package org.xbib.cql;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  *
  */
-public class QueryTest extends Assert {
+class QueryTest {
 
     @Test
-    public void testValidQueries() throws IOException {
+    void testValidQueries() throws IOException {
         test("queries.txt");
     }
 

@@ -1,16 +1,16 @@
 package org.xbib.cql.util;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
  */
-public class QuotedStringTokenizerTest {
+class QuotedStringTokenizerTest {
 
     @Test
-    public void testTokenizer() throws Exception {
+    void testTokenizer() throws Exception {
         String s = "Linux is \"pinguin's best friend\", not Windows";
         QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(s);
         assertEquals("Linux", tokenizer.nextToken());
