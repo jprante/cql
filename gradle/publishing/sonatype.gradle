@@ -3,16 +3,6 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
 
     apply plugin: 'io.codearte.nexus-staging'
 
-    nexusPublishing {
-        repositories {
-            sonatype {
-                username = project.property('ossrhUsername')
-                password = project.property('ossrhPassword')
-                packageGroup = "org.xbib"
-            }
-        }
-    }
-
     nexusStaging {
         username = project.property('ossrhUsername')
         password = project.property('ossrhPassword')
