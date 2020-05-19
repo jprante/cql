@@ -1,4 +1,4 @@
 dependencies {
-    compile project(':cql-common')
-    compile "org.xbib:content-core:${project.property('xbib-content.version')}"
+    api project(':cql-common')
+    api "org.xbib:content-core:${project.property('xbib-content.version')}"
 }

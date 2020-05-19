@@ -40,11 +40,11 @@ import java.util.Stack;
  */
 public class ElasticsearchQueryGenerator implements Visitor {
 
-    private ElasticsearchQueryModel model;
+    private final ElasticsearchQueryModel model;
 
-    private ElasticsearchFilterGenerator filterGenerator;
+    private final ElasticsearchFilterGenerator filterGenerator;
 
-    private Stack<Node> stack;
+    private final Stack<Node> stack;
 
     private int from;
 
@@ -58,9 +58,9 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private String boostMode;
 
-    private SourceGenerator sourceGen;
+    private final SourceGenerator sourceGen;
 
-    private QueryGenerator queryGen;
+    private final QueryGenerator queryGen;
 
     private FilterGenerator filterGen;
 
@@ -68,20 +68,16 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private XContentBuilder sort;
 
-    public ElasticsearchQueryGenerator() {
+    public ElasticsearchQueryGenerator() throws IOException {
         this.from = 0;
         this.size = 10;
         this.model = new ElasticsearchQueryModel();
         this.filterGenerator = new ElasticsearchFilterGenerator(model);
         this.stack = new Stack<>();
-        try {
-            this.sourceGen = new SourceGenerator();
-            this.queryGen = new QueryGenerator();
-            this.filterGen = new FilterGenerator();
-            this.facetGen = new FacetsGenerator();
-        } catch (IOException e) {
-            // ignore
-        }
+        this.sourceGen = new SourceGenerator();
+        this.queryGen = new QueryGenerator();
+        this.filterGen = new FilterGenerator();
+        this.facetGen = new FacetsGenerator();
     }
 
     public ElasticsearchQueryModel getModel() {
@@ -137,20 +133,15 @@ public class ElasticsearchQueryGenerator implements Visitor {
         return this;
     }
 
-    public String getQueryResult() {
+    public String getQueryResult() throws IOException {
         return queryGen.getResult().string();
     }
 
-
-    public String getFacetResult() {
-        try {
-            return facetGen.getResult().string();
-        } catch (IOException e) {
-            return e.getMessage();
-        }
+    public String getFacetResult() throws IOException {
+        return facetGen.getResult().string();
     }
 
-    public String getSourceResult() {
+    public String getSourceResult() throws IOException {
         return sourceGen.getResult().string();
     }
 
