@@ -8,7 +8,12 @@ package org.xbib.cql;
 public class Index extends AbstractNode {
 
     private String context;
+
     private String name;
+
+    public Index(SimpleName name) {
+        this(name.getName());
+    }
 
     public Index(String name) {
         this.name = name;
@@ -19,8 +24,8 @@ public class Index extends AbstractNode {
         }
     }
 
-    public Index(SimpleName name) {
-        this(name.getName());
+    public void setContext(String context) {
+        this.context = context;
     }
 
     /**
@@ -28,6 +33,10 @@ public class Index extends AbstractNode {
      */
     public String getContext() {
         return context;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

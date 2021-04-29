@@ -15,23 +15,18 @@ public final class CQLGenerator implements Visitor {
      */
     private CQLQueryModel model;
 
-    /**
-     * A replacement string.
-     */
-    private String replacementString;
-
-    /**
-     * String to be replaced.
-     */
-    private String stringToBeReplaced;
+    private Visitor substitutor;
 
     public CQLGenerator() {
-        this.replacementString = null;
-        this.stringToBeReplaced = null;
         this.model = new CQLQueryModel();
     }
 
-    public CQLGenerator model(CQLQueryModel model) {
+    public CQLGenerator setSubstitutor(Visitor substitutor) {
+        this.substitutor = substitutor;
+        return this;
+    }
+
+    public CQLGenerator setModel(CQLQueryModel model) {
         this.model = model;
         return this;
     }
@@ -46,6 +41,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(SortedQuery node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getSortSpec() != null) {
             node.getSortSpec().accept(this);
         }
@@ -57,6 +55,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(Query node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getPrefixAssignments() != null) {
             for (PrefixAssignment assignment : node.getPrefixAssignments()) {
                 assignment.accept(this);
@@ -72,6 +73,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(SortSpec node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getSingleSpec() != null) {
             node.getSingleSpec().accept(this);
         }
@@ -82,6 +86,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(SingleSpec node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getIndex() != null) {
             node.getIndex().accept(this);
         }
@@ -92,12 +99,18 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(PrefixAssignment node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         node.getPrefix().accept(this);
         node.getURI().accept(this);
     }
 
     @Override
     public void visit(ScopedClause node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getScopedClause() != null) {
             node.getScopedClause().accept(this);
         }
@@ -112,6 +125,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(BooleanGroup node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getModifierList() != null) {
             node.getModifierList().accept(this);
         }
@@ -119,6 +135,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(SearchClause node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getQuery() != null) {
             node.getQuery().accept(this);
         }
@@ -146,6 +165,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(Relation node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getModifierList() != null) {
             node.getModifierList().accept(this);
         }
@@ -153,6 +175,9 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(Modifier node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         if (node.getTerm() != null) {
             node.getTerm().accept(this);
         }
@@ -163,48 +188,40 @@ public final class CQLGenerator implements Visitor {
 
     @Override
     public void visit(ModifierList node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
         for (Modifier modifier : node.getModifierList()) {
             modifier.accept(this);
         }
     }
 
     @Override
-    public synchronized void visit(Term node) {
-        if (replacementString != null && stringToBeReplaced.equals(node.getValue())) {
-            node.setValue(replacementString);
+    public void visit(Term node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
         }
     }
 
     @Override
     public void visit(Identifier node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
     }
 
     @Override
     public void visit(SimpleName node) {
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
     }
 
     @Override
     public void visit(Index node) {
-    }
-
-    /**
-     * Write a substitution query, for example when a term has been
-     * suggested to be replaced by another term.
-     *
-     * @param oldTerm the term to be replaced
-     * @param newTerm the replacement term
-     * @return the new query with the term replaced
-     */
-    public synchronized String writeSubstitutedForm(String oldTerm, String newTerm) {
-        this.stringToBeReplaced = oldTerm;
-        this.replacementString = newTerm;
-        CQLParser parser = new CQLParser(model.getQuery());
-        parser.parse();
-        parser.getCQLQuery().accept(this);
-        String result = model.getQuery();
-        this.stringToBeReplaced = null;
-        this.replacementString = null;
-        return result;
+        if (substitutor != null) {
+            substitutor.visit(node);
+        }
     }
 
     public String withBreadcrumbs() {
