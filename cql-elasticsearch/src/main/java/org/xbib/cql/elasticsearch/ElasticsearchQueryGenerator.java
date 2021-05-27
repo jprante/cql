@@ -1,6 +1,7 @@
 package org.xbib.cql.elasticsearch;
 
 import org.xbib.content.XContentBuilder;
+import org.xbib.content.core.DefaultXContentBuilder;
 import org.xbib.cql.BooleanGroup;
 import org.xbib.cql.BooleanOperator;
 import org.xbib.cql.CQLParser;
@@ -158,7 +159,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
             }
             if (model.hasFilter()) {
                 queryGen.startFiltered();
-            } else if (filterGenerator.getResult().bytes().length() > 0) {
+            } else if (filterGenerator.getResult().string().length() > 0) {
                 queryGen.startFiltered();
             }
             Node querynode = stack.pop();
@@ -169,16 +170,18 @@ public class ElasticsearchQueryGenerator implements Visitor {
                         new Expression(Operator.EQUALS, new Name("cql.allIndexes"), querynode);
             }
             queryGen.visit((Expression) querynode);
-            if (model.hasFilter()) {
+            if (model.hasFilter() && model.getFilterExpression() != null) {
                 queryGen.end();
                 filterGen = new FilterGenerator(queryGen);
                 filterGen.startFilter();
                 filterGen.visit(model.getFilterExpression());
                 filterGen.endFilter();
                 queryGen.end();
-            } else if (filterGenerator.getResult().bytes().length() > 0) {
+            } else if (filterGenerator.getResult().string().length() > 0) {
                 queryGen.end();
-                queryGen.getResult().rawField("filter", filterGenerator.getResult().bytes().toBytes());
+                DefaultXContentBuilder contentBuilder = (DefaultXContentBuilder) filterGenerator.getResult();
+                byte[] b = contentBuilder.bytes().toBytes();
+                queryGen.getResult().rawField("filter", b, 0, b.length);
                 queryGen.endFiltered();
             }
             if (boostField != null) {
