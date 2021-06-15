@@ -53,10 +53,10 @@ public class SearchClause extends AbstractNode {
     public String toString() {
         return query != null && query.toString().length() > 0 ? "(" + query + ")"
                 : query != null ? ""
+                : index != null && index.getContext() == null && index.getName() == null && term != null ? term.toString()
                 : index != null && !CQLQueryModel.isVisible(index.getContext()) ? ""
                 : index != null ? index + " " + relation + " " + term
                 : term != null ? term.toString()
                 : "";
     }
-
 }

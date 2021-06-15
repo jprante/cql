@@ -393,7 +393,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
     @Override
     public void visit(Index node) {
         String context = node.getContext();
-        String name = context != null ? context + "." + node.getName() : node.getName();
+        String name = context != null && !context.isEmpty() ? context + "." + node.getName() : node.getName();
         Name esname = new Name(name, model.getVisibility(context));
         esname.setType(model.getElasticsearchType(name));
         stack.push(esname);

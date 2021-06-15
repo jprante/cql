@@ -165,15 +165,16 @@ public final class CQLQueryModel {
     }
 
     /**
-     * Get query  of a given context.
+     * Get query of a given context.
      *
      * @param context the context
      * @return true if visible, false if not
      */
     public static boolean isVisible(String context) {
-        return !isFacetContext(context)
-                && !isFilterContext(context)
-                && !isOptionContext(context);
+        return context != null &&
+                !isFacetContext(context) &&
+                !isFilterContext(context) &&
+                !isOptionContext(context);
     }
 
     /**

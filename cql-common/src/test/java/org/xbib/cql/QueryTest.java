@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 class QueryTest {
+
+    private static final Logger logger = Logger.getLogger(QueryTest.class.getName());
 
     @Test
     void testValidQueries() throws IOException {
@@ -37,14 +41,15 @@ class QueryTest {
                     }
                     ok++;
                 } catch (Exception e) {
+                    logger.log(Level.WARNING, e.getMessage());
                     errors++;
                 }
                 count++;
             }
         }
         lr.close();
-        assertEquals(errors, 0);
-        assertEquals(ok, count);
+        assertEquals(0, errors);
+        assertEquals(count, ok);
     }
 
     private void validate(String line) throws Exception {

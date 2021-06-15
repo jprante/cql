@@ -16,11 +16,14 @@ public class Index extends AbstractNode {
     }
 
     public Index(String name) {
+        this.context = "";
         this.name = name;
-        int pos = name.indexOf('.');
-        if (pos > 0) {
-            this.context = name.substring(0, pos);
-            this.name = name.substring(pos + 1);
+        if (name != null) {
+            int pos = name.indexOf('.');
+            if (pos > 0) {
+                this.context = name.substring(0, pos);
+                this.name = name.substring(pos + 1);
+            }
         }
     }
 
@@ -54,7 +57,6 @@ public class Index extends AbstractNode {
 
     @Override
     public String toString() {
-        return context != null ? context + "." + name : name;
+        return context != null && !context.isEmpty() ? context + "." + name : name;
     }
-
 }
