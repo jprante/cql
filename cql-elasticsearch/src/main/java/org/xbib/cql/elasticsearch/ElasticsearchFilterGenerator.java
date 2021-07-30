@@ -41,15 +41,18 @@ public class ElasticsearchFilterGenerator implements Visitor {
 
     private final ElasticsearchQueryModel model;
 
-    private Stack<Node> stack;
+    private final Stack<Node> stack;
+
+    private final String globalField;
 
     private FilterGenerator filterGen;
 
-    public ElasticsearchFilterGenerator() {
-        this(new ElasticsearchQueryModel());
+    public ElasticsearchFilterGenerator(String globalField) {
+        this(globalField, new ElasticsearchQueryModel());
     }
 
-    public ElasticsearchFilterGenerator(ElasticsearchQueryModel model) {
+    public ElasticsearchFilterGenerator(String globalField, ElasticsearchQueryModel model) {
+        this.globalField = globalField;
         this.model = model;
         this.stack = new Stack<>();
         try {
@@ -84,7 +87,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
             node.getQuery().accept(this);
             Node querynode = stack.pop();
             if (querynode instanceof Token) {
-                filterGen.visit(new Expression(Operator.TERM_FILTER, new Name("cql.allIndexes"), querynode));
+                filterGen.visit(new Expression(Operator.TERM_FILTER, new Name(globalField), querynode));
             } else if (querynode instanceof Expression) {
                 filterGen.visit(new Expression(Operator.QUERY_FILTER, (Expression) querynode));
             }
@@ -152,7 +155,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
                 Node esnode = stack.pop();
                 // add default context if node is a literal without a context
                 if (esnode instanceof Token && TokenType.STRING.equals(esnode.getType())) {
-                    esnode = new Expression(Operator.ALL, new Name("cql.allIndexes"), esnode);
+                    esnode = new Expression(Operator.ALL, new Name(globalField), esnode);
                 }
                 if (stack.isEmpty()) {
                     // unary expression
@@ -162,7 +165,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
                     Node esnode2 = stack.pop();
                     // add default context if node is a literal without context
                     if (esnode2 instanceof Token && TokenType.STRING.equals(esnode2.getType())) {
-                        esnode2 = new Expression(Operator.ALL, new Name("cql.allIndexes"), esnode2);
+                        esnode2 = new Expression(Operator.ALL, new Name(globalField), esnode2);
                     }
                     esnode = new Expression(op, esnode2, esnode);
                 }

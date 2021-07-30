@@ -25,7 +25,7 @@ class ElasticsearchQueryTest {
         String cql = "Jörg";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator();
+        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getResult().string();
         assertEquals(json, "{\"term\":{\"cql.allIndexes\":\"Jörg\"}}");
@@ -36,7 +36,7 @@ class ElasticsearchQueryTest {
         String cql = "dc.type = electronic";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator();
+        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getResult().string();
         assertEquals(json, "{\"query\":{\"term\":{\"dc.type\":\"electronic\"}}}");
@@ -47,7 +47,7 @@ class ElasticsearchQueryTest {
         String cql = "dc.type = electronic and dc.date = 2013";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator();
+        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getResult().string();
         assertEquals(
@@ -61,7 +61,7 @@ class ElasticsearchQueryTest {
         String cql = "dc.format = online and dc.type = electronic and dc.date = 2013";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator();
+        ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getResult().string();
         assertEquals(
@@ -75,7 +75,7 @@ class ElasticsearchQueryTest {
         String cql = "Jörg";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator();
+        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator("cql.allIndexes");
         generator.setBoostParams("boost", "log2p", 2.0f, "sum");
         parser.getCQLQuery().accept(generator);
         String json = generator.getSourceResult();
@@ -92,7 +92,7 @@ class ElasticsearchQueryTest {
         String cql = "dc.format = book*";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator();
+        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getSourceResult();
         assertEquals("{\"from\":0,\"size\":10,\"query\":{\"simple_query_string\":" +
@@ -130,7 +130,7 @@ class ElasticsearchQueryTest {
     private void validate(String cql, String expected) throws Exception {
         CQLParser parser = new CQLParser(cql);
         parser.parse();
-        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator();
+        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String elasticsearchQuery = generator.getSourceResult();
         assertEquals(expected, elasticsearchQuery);
