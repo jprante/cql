@@ -69,7 +69,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private XContentBuilder sort;
 
-    private String globalField;
+    private final String globalField;
 
     public ElasticsearchQueryGenerator(String globalField) throws IOException {
         this.globalField = globalField;
@@ -170,7 +170,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 Token token = (Token) querynode;
                 querynode = ".".equals(token.getString()) ?
                         new Expression(Operator.MATCH_ALL) :
-                        new Expression(Operator.EQUALS, new Name(globalField), querynode);
+                        new Expression(Operator.ALL, new Name(globalField), querynode);
             }
             queryGen.visit((Expression) querynode);
             if (model.hasFilter() && model.getFilterExpression() != null) {
@@ -279,7 +279,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 Node esnode = stack.pop();
                 // add default context if node is a literal without a context
                 if (esnode instanceof Token && TokenType.STRING.equals(esnode.getType())) {
-                    esnode = new Expression(Operator.EQUALS, new Name(globalField), esnode);
+                    esnode = new Expression(Operator.ALL, new Name(globalField), esnode);
                 }
                 if (stack.isEmpty()) {
                     // unary expression
@@ -289,7 +289,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
                     Node esnode2 = stack.pop();
                     // add default context if node is a literal without context
                     if (esnode2 instanceof Token && TokenType.STRING.equals(esnode2.getType())) {
-                        esnode2 = new Expression(Operator.EQUALS, new Name(globalField), esnode2);
+                        esnode2 = new Expression(Operator.ALL, new Name(globalField), esnode2);
                     }
                     esnode = new Expression(op, esnode2, esnode);
                 }

@@ -122,11 +122,8 @@ public class QueryGenerator implements Visitor {
             Operator op = node.getOperator();
             switch (op.getArity()) {
                 case 0: {
-                    switch (op) {
-                        case MATCH_ALL: {
-                            builder.startObject("match_all").endObject();
-                            break;
-                        }
+                    if (op == Operator.MATCH_ALL) {
+                        builder.startObject("match_all").endObject();
                     }
                     break;
                 }
@@ -149,7 +146,7 @@ public class QueryGenerator implements Visitor {
                     switch (op) {
                         case EQUALS: {
                             String field = arg1.toString();
-                            String value = arg2 != null ? arg2.toString() : "";
+                            String value = arg2 != null ? arg2.toString() : ""; // with quote
                             builder.startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
@@ -160,20 +157,22 @@ public class QueryGenerator implements Visitor {
                         }
                         case NOT_EQUALS: {
                             String field = arg1.toString();
-                            String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("bool").startObject("must_not");
-                            builder.startObject("simple_query_string")
+                            String value = arg2 != null ? arg2.toString() : ""; // with quote
+                            builder.startObject("bool")
+                                    .startObject("must_not")
+                                    .startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
+                                    .endObject()
+                                    .endObject()
                                     .endObject();
-                            builder.endObject().endObject();
                             break;
                         }
                         case ALL: {
                             String field = arg1.toString();
-                            String value = tok2 != null ? tok2.getString() : "";
+                            String value = tok2 != null ? tok2.getString() : ""; // always unquoted
                             builder.startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
@@ -184,7 +183,7 @@ public class QueryGenerator implements Visitor {
                         }
                         case ANY: {
                             String field = arg1.toString();
-                            String value = tok2 != null ? tok2.getString() : "";
+                            String value = tok2 != null ? tok2.getString() : ""; // always unquoted
                             builder.startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
@@ -204,11 +203,11 @@ public class QueryGenerator implements Visitor {
                                 } else if (tok2.isBoundary()) {
                                     builder.startObject("prefix").field(field, value).endObject();
                                 } else {
-                                    builder.startObject("match_phrase")
-                                            .startObject(field)
+                                    builder.startObject("simple_query_string")
                                             .field("query", value)
-                                            .field("slop", 0)
-                                            .endObject()
+                                            .field("fields", new String[]{field})
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
                                             .endObject();
                                 }
                             }
@@ -373,4 +372,5 @@ public class QueryGenerator implements Visitor {
             throw new SyntaxException("internal error while building elasticsearch query", e);
         }
     }
+
 }
