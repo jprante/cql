@@ -147,11 +147,26 @@ public class QueryGenerator implements Visitor {
                         case EQUALS: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : ""; // with quote
-                            builder.startObject("simple_query_string")
+                            // with phrase boost
+                            builder.startObject("bool")
+                                    .startArray("should")
+                                    .startObject()
+                                    .startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
+                                    .endObject()
+                                    .endObject()
+                                    .startObject()
+                                    .startObject("simple_query_string")
+                                    .field("query", "\"" + value + "\"")
+                                    .field("fields", new String[]{ field + "^2"})
+                                    .field("default_operator", "and")
+                                    .endObject()
+                                    .endObject()
+                                    .endArray()
+                                    .field("minimum_should_match", "1")
                                     .endObject();
                             break;
                         }
@@ -173,22 +188,50 @@ public class QueryGenerator implements Visitor {
                         case ALL: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
-                            builder.startObject("simple_query_string")
+                            // with phrase boost
+                            builder.startObject("bool")
+                                    .startArray("should")
+                                    .startObject()
+                                    .startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
+                                    .endObject()
+                                    .endObject()
+                                    .startObject()
+                                    .startObject("simple_query_string")
+                                    .field("query", "\"" + value + "\"")
+                                    .field("fields", new String[]{ field + "^2"})
+                                    .field("default_operator", "and")
+                                    .endObject()
+                                    .endObject()
+                                    .endArray()
+                                    .field("minimum_should_match", "1")
                                     .endObject();
                             break;
                         }
                         case ANY: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
-                            builder.startObject("simple_query_string")
+                            // with phrase boost
+                            builder.startObject("bool")
+                                    .startArray("should")
+                                    .startObject()
+                                    .startObject("simple_query_string")
                                     .field("query", value)
                                     .field("fields", new String[]{field})
                                     .field("analyze_wildcard", true)
-                                    .field("default_operator", "or")
+                                    .endObject()
+                                    .endObject()
+                                    .startObject()
+                                    .startObject("simple_query_string")
+                                    .field("query", "\"" + value + "\"")
+                                    .field("fields", new String[]{ field + "^2"})
+                                    .endObject()
+                                    .endObject()
+                                    .endArray()
+                                    .field("minimum_should_match", "1")
                                     .endObject();
                             break;
                         }
@@ -357,7 +400,7 @@ public class QueryGenerator implements Visitor {
                         case PROX: {
                             String field = arg1.toString();
                             // we assume a default of 10 words is enough for proximity
-                            String value = arg2 != null ? arg2.toString() + "~10" : "";
+                            String value = arg2 != null ? arg2 + "~10" : "";
                             builder.startObject("field").field(field, value).endObject();
                             break;
                         }

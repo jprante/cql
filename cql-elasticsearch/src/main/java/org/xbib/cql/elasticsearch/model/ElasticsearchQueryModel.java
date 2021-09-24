@@ -128,12 +128,12 @@ public final class ElasticsearchQueryModel {
         Expression conjunctiveclause = null;
         if (!conjunctivefilters.isEmpty()) {
             conjunctiveclause = new Expression(Operator.AND,
-                    conjunctivefilters.values().toArray(new Node[conjunctivefilters.size()]));
+                    conjunctivefilters.values().toArray(new Node[0]));
         }
         Expression disjunctiveclause = null;
         if (!disjunctivefilters.isEmpty()) {
             disjunctiveclause = new Expression(Operator.OR,
-                    disjunctivefilters.values().toArray(new Node[disjunctivefilters.size()]));
+                    disjunctivefilters.values().toArray(new Node[0]));
         }
         if (conjunctiveclause != null && disjunctiveclause == null) {
             return conjunctiveclause;
