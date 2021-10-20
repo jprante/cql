@@ -1,7 +1,5 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
-import org.xbib.content.json.JsonXContent;
 import org.xbib.cql.SyntaxException;
 import org.xbib.cql.elasticsearch.ast.Expression;
 import org.xbib.cql.elasticsearch.ast.Modifier;
@@ -9,53 +7,54 @@ import org.xbib.cql.elasticsearch.ast.Name;
 import org.xbib.cql.elasticsearch.ast.Node;
 import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
-
+import java.util.Collections;
 
 /**
  * Build Elasticsearch query from abstract syntax tree.
  */
 public class QueryGenerator implements Visitor {
 
-    private final XContentBuilder builder;
+    private final JsonBuilder builder;
 
-    public QueryGenerator() throws IOException {
-        this.builder = JsonXContent.contentBuilder();
+    public QueryGenerator() {
+        this.builder = new JsonBuilder();
     }
 
     public void start() throws IOException {
-        builder.startObject();
+        builder.beginMap();
     }
 
     public void end() throws IOException {
-        builder.endObject();
+        builder.endMap();
     }
 
     public void startFiltered() throws IOException {
-        builder.startObject("filtered").startObject("query");
+        builder.beginMap("filtered").beginMap("query");
     }
 
     public void endFiltered() throws IOException {
-        builder.endObject();
+        builder.endMap();
     }
 
     public void startBoost(String boostField, String modifier, Float factor, String boostMode) throws IOException {
-        builder.startObject("function_score")
-                .startObject("field_value_factor")
+        builder.beginMap("function_score")
+                .beginMap("field_value_factor")
                 .field("field", boostField)
                 .field("modifier", modifier != null ? modifier : "log1p")
                 .field("factor", factor != null ? factor : 1.0f)
-                .endObject()
+                .endMap()
                 .field("boost_mode", boostMode != null ? boostMode : "multiply")
-                .startObject("query");
+                .beginMap("query");
     }
 
     public void endBoost() throws IOException {
-        builder.endObject().endObject();
+        builder.endMap().endMap();
     }
 
-    public XContentBuilder getResult() {
+    public JsonBuilder getResult() {
         return builder;
     }
 
@@ -64,19 +63,19 @@ public class QueryGenerator implements Visitor {
         try {
             switch (token.getType()) {
                 case BOOL:
-                    builder.value(token.getBoolean());
+                    builder.buildValue(token.getBoolean());
                     break;
                 case INT:
-                    builder.value(token.getInteger());
+                    builder.buildValue(token.getInteger());
                     break;
                 case FLOAT:
-                    builder.value(token.getFloat());
+                    builder.buildValue(token.getFloat());
                     break;
                 case DATETIME:
-                    builder.value(token.getDate());
+                    builder.buildValue(token.getDate());
                     break;
                 case STRING:
-                    builder.value(token.getString());
+                    builder.buildValue(token.getString());
                     break;
                 default:
                     throw new IOException("unknown token type: " + token);
@@ -89,7 +88,7 @@ public class QueryGenerator implements Visitor {
     @Override
     public void visit(Name node) {
         try {
-            builder.field(node.toString());
+            builder.buildKey(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -98,7 +97,7 @@ public class QueryGenerator implements Visitor {
     @Override
     public void visit(Modifier node) {
         try {
-            builder.value(node.toString());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -107,7 +106,7 @@ public class QueryGenerator implements Visitor {
     @Override
     public void visit(Operator node) {
         try {
-            builder.value(node.toString());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -123,7 +122,7 @@ public class QueryGenerator implements Visitor {
             switch (op.getArity()) {
                 case 0: {
                     if (op == Operator.MATCH_ALL) {
-                        builder.startObject("match_all").endObject();
+                        builder.beginMap("match_all").endMap();
                     }
                     break;
                 }
@@ -148,91 +147,91 @@ public class QueryGenerator implements Visitor {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : ""; // with quote
                             // with phrase boost
-                            builder.startObject("bool")
-                                    .startArray("should")
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                            builder.beginMap("bool")
+                                    .beginCollection("should")
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", value)
-                                    .field("fields", new String[]{field})
+                                    .field("fields", Collections.singletonList(field))
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
-                                    .endObject()
-                                    .endObject()
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                                    .endMap()
+                                    .endMap()
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", "\"" + value + "\"")
-                                    .field("fields", new String[]{ field + "^2"})
+                                    .field("fields", Collections.singletonList(field + "^2"))
                                     .field("default_operator", "and")
-                                    .endObject()
-                                    .endObject()
-                                    .endArray()
+                                    .endMap()
+                                    .endMap()
+                                    .endCollection()
                                     .field("minimum_should_match", "1")
-                                    .endObject();
+                                    .endMap();
                             break;
                         }
                         case NOT_EQUALS: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : ""; // with quote
-                            builder.startObject("bool")
-                                    .startObject("must_not")
-                                    .startObject("simple_query_string")
+                            builder.beginMap("bool")
+                                    .beginMap("must_not")
+                                    .beginMap("simple_query_string")
                                     .field("query", value)
-                                    .field("fields", new String[]{field})
+                                    .field("fields", Collections.singletonList(field))
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
-                                    .endObject()
-                                    .endObject()
-                                    .endObject();
+                                    .endMap()
+                                    .endMap()
+                                    .endMap();
                             break;
                         }
                         case ALL: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
                             // with phrase boost
-                            builder.startObject("bool")
-                                    .startArray("should")
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                            builder.beginMap("bool")
+                                    .beginCollection("should")
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", value)
-                                    .field("fields", new String[]{field})
+                                    .field("fields", Collections.singletonList(field))
                                     .field("analyze_wildcard", true)
                                     .field("default_operator", "and")
-                                    .endObject()
-                                    .endObject()
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                                    .endMap()
+                                    .endMap()
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", "\"" + value + "\"")
-                                    .field("fields", new String[]{ field + "^2"})
+                                    .field("fields", Collections.singletonList(field + "^2"))
                                     .field("default_operator", "and")
-                                    .endObject()
-                                    .endObject()
-                                    .endArray()
+                                    .endMap()
+                                    .endMap()
+                                    .endCollection()
                                     .field("minimum_should_match", "1")
-                                    .endObject();
+                                    .endMap();
                             break;
                         }
                         case ANY: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
                             // with phrase boost
-                            builder.startObject("bool")
-                                    .startArray("should")
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                            builder.beginMap("bool")
+                                    .beginCollection("should")
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", value)
-                                    .field("fields", new String[]{field})
+                                    .field("fields", Collections.singletonList(field))
                                     .field("analyze_wildcard", true)
-                                    .endObject()
-                                    .endObject()
-                                    .startObject()
-                                    .startObject("simple_query_string")
+                                    .endMap()
+                                    .endMap()
+                                    .beginMap()
+                                    .beginMap("simple_query_string")
                                     .field("query", "\"" + value + "\"")
-                                    .field("fields", new String[]{ field + "^2"})
-                                    .endObject()
-                                    .endObject()
-                                    .endArray()
+                                    .field("fields", Collections.singletonList(field + "^2"))
+                                    .endMap()
+                                    .endMap()
+                                    .endCollection()
                                     .field("minimum_should_match", "1")
-                                    .endObject();
+                                    .endMap();
                             break;
                         }
                         case PHRASE: {
@@ -240,18 +239,18 @@ public class QueryGenerator implements Visitor {
                                 String field = arg1.toString();
                                 String value = tok2.isQuoted() ? tok2.getString() : arg2.toString();
                                 if (tok2.isAll()) {
-                                    builder.startObject("match_all").endObject();
+                                    builder.beginMap("match_all").endMap();
                                 } else if (tok2.isWildcard()) {
-                                    builder.startObject("wildcard").field(field, value).endObject();
+                                    builder.beginMap("wildcard").field(field, value).endMap();
                                 } else if (tok2.isBoundary()) {
-                                    builder.startObject("prefix").field(field, value).endObject();
+                                    builder.beginMap("prefix").field(field, value).endMap();
                                 } else {
-                                    builder.startObject("simple_query_string")
+                                    builder.beginMap("simple_query_string")
                                             .field("query", value)
-                                            .field("fields", new String[]{field})
+                                            .field("fields",Collections.singletonList(field))
                                             .field("analyze_wildcard", true)
                                             .field("default_operator", "and")
-                                            .endObject();
+                                            .endMap();
                                 }
                             }
                             break;
@@ -259,37 +258,37 @@ public class QueryGenerator implements Visitor {
                         case RANGE_GREATER_THAN: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("from", value)
                                     .field("include_lower", false)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_GREATER_OR_EQUAL: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("from", value)
                                     .field("include_lower", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_LESS_THAN: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("to", value)
                                     .field("include_upper", false)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_LESS_OR_EQUALS: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("to", value)
                                     .field("include_upper", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_WITHIN: {
@@ -310,12 +309,12 @@ public class QueryGenerator implements Visitor {
                                 from = tok2.getStringList().get(0);
                                 to = tok2.getStringList().get(1);
                             }
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("from", from)
                                     .field("to", to)
                                     .field("include_lower", true)
                                     .field("include_upper", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case AND: {
@@ -324,23 +323,23 @@ public class QueryGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
+                                builder.beginMap("bool");
                                 if (arg1.isVisible() && arg2.isVisible()) {
-                                    builder.startArray("must").startObject();
+                                    builder.beginCollection("must").beginMap();
                                     arg1.accept(this);
-                                    builder.endObject().startObject();
+                                    builder.endMap().beginMap();
                                     arg2.accept(this);
-                                    builder.endObject().endArray();
+                                    builder.endMap().endCollection();
                                 } else if (arg1.isVisible()) {
-                                    builder.startObject("must");
+                                    builder.beginMap("must");
                                     arg1.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 } else if (arg2.isVisible()) {
-                                    builder.startObject("must");
+                                    builder.beginMap("must");
                                     arg2.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 }
-                                builder.endObject();
+                                builder.endMap();
                             }
                             break;
                         }
@@ -351,23 +350,23 @@ public class QueryGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
+                                builder.beginMap("bool");
                                 if (arg1.isVisible() && arg2.isVisible()) {
-                                    builder.startArray("should").startObject();
+                                    builder.beginCollection("should").beginMap();
                                     arg1.accept(this);
-                                    builder.endObject().startObject();
+                                    builder.endMap().beginMap();
                                     arg2.accept(this);
-                                    builder.endObject().endArray();
+                                    builder.endMap().endCollection();
                                 } else if (arg1.isVisible()) {
-                                    builder.startObject("should");
+                                    builder.beginMap("should");
                                     arg1.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 } else if (arg2.isVisible()) {
-                                    builder.startObject("should");
+                                    builder.beginMap("should");
                                     arg2.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 }
-                                builder.endObject();
+                                builder.endMap();
                             }
                             break;
                         }
@@ -377,23 +376,23 @@ public class QueryGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
+                                builder.beginMap("bool");
                                 if (arg1.isVisible() && arg2.isVisible()) {
-                                    builder.startArray("must_not").startObject();
+                                    builder.beginCollection("must_not").beginMap();
                                     arg1.accept(this);
-                                    builder.endObject().startObject();
+                                    builder.endMap().beginMap();
                                     arg2.accept(this);
-                                    builder.endObject().endArray();
+                                    builder.endMap().endCollection();
                                 } else if (arg1.isVisible()) {
-                                    builder.startObject("must_not");
+                                    builder.beginMap("must_not");
                                     arg1.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 } else if (arg2.isVisible()) {
-                                    builder.startObject("must_not");
+                                    builder.beginMap("must_not");
                                     arg2.accept(this);
-                                    builder.endObject();
+                                    builder.endMap();
                                 }
-                                builder.endObject();
+                                builder.endMap();
                             }
                             break;
                         }
@@ -401,7 +400,7 @@ public class QueryGenerator implements Visitor {
                             String field = arg1.toString();
                             // we assume a default of 10 words is enough for proximity
                             String value = arg2 != null ? arg2 + "~10" : "";
-                            builder.startObject("field").field(field, value).endObject();
+                            builder.beginMap("field").field(field, value).endMap();
                             break;
                         }
                         default:

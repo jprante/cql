@@ -1,6 +1,5 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
 import org.xbib.cql.BooleanGroup;
 import org.xbib.cql.BooleanOperator;
 import org.xbib.cql.Comparitor;
@@ -27,6 +26,7 @@ import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
 import org.xbib.cql.elasticsearch.ast.TokenType;
 import org.xbib.cql.elasticsearch.model.ElasticsearchQueryModel;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -45,7 +45,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
 
     private final String globalField;
 
-    private FilterGenerator filterGen;
+    private final FilterGenerator filterGen;
 
     public ElasticsearchFilterGenerator(String globalField) {
         this(globalField, new ElasticsearchQueryModel());
@@ -55,11 +55,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
         this.globalField = globalField;
         this.model = model;
         this.stack = new Stack<>();
-        try {
-            this.filterGen = new FilterGenerator();
-        } catch (IOException e) {
-            // ignore
-        }
+        this.filterGen = new FilterGenerator();
     }
 
     public void addOrFilter(String filterKey, Collection<String> filterValues) {
@@ -76,7 +72,7 @@ public class ElasticsearchFilterGenerator implements Visitor {
         }
     }
 
-    public XContentBuilder getResult() throws IOException {
+    public JsonBuilder getResult() {
         return filterGen.getResult();
     }
 

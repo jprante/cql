@@ -7,12 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- *
- */
 class ElasticsearchQueryTest {
 
     @Test
@@ -27,7 +26,7 @@ class ElasticsearchQueryTest {
         parser.parse();
         ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
-        String json = generator.getResult().string();
+        String json = generator.getResult().build();
         assertEquals(json, "{\"term\":{\"cql.allIndexes\":\"Jörg\"}}");
     }
 
@@ -38,7 +37,7 @@ class ElasticsearchQueryTest {
         parser.parse();
         ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
-        String json = generator.getResult().string();
+        String json = generator.getResult().build();
         assertEquals(json, "{\"query\":{\"term\":{\"dc.type\":\"electronic\"}}}");
     }
 
@@ -49,7 +48,7 @@ class ElasticsearchQueryTest {
         parser.parse();
         ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
-        String json = generator.getResult().string();
+        String json = generator.getResult().build();
         assertEquals(
                 "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"dc.type\":\"electronic\"}},{\"term\":{\"dc.date\":\"2013\"}}]}}}",
                 json
@@ -63,7 +62,7 @@ class ElasticsearchQueryTest {
         parser.parse();
         ElasticsearchFilterGenerator generator = new ElasticsearchFilterGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
-        String json = generator.getResult().string();
+        String json = generator.getResult().build();
         assertEquals(
                 "{\"query\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"term\":{\"dc.format\":\"online\"}}," +
                         "{\"term\":{\"dc.type\":\"electronic\"}}]}},{\"term\":{\"dc.date\":\"2013\"}}]}}}",
@@ -112,6 +111,8 @@ class ElasticsearchQueryTest {
                     }
                 } catch (Exception e) {
                     errors++;
+                    Logger.getAnonymousLogger().log(Level.SEVERE, line);
+                    Logger.getAnonymousLogger().log(Level.SEVERE, e.getMessage(), e);
                 }
                 count++;
             }

@@ -1,7 +1,5 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
-import org.xbib.content.core.DefaultXContentBuilder;
 import org.xbib.cql.BooleanGroup;
 import org.xbib.cql.BooleanOperator;
 import org.xbib.cql.CQLParser;
@@ -29,6 +27,7 @@ import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
 import org.xbib.cql.elasticsearch.ast.TokenType;
 import org.xbib.cql.elasticsearch.model.ElasticsearchQueryModel;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -67,7 +66,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private FacetsGenerator facetGen;
 
-    private XContentBuilder sort;
+    private SortGenerator sortGen;
 
     private final String globalField;
 
@@ -82,6 +81,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
         this.queryGen = new QueryGenerator();
         this.filterGen = new FilterGenerator();
         this.facetGen = new FacetsGenerator();
+        this.sortGen = new SortGenerator();
     }
 
     public ElasticsearchQueryModel getModel() {
@@ -95,11 +95,6 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     public ElasticsearchQueryGenerator setSize(int size) {
         this.size = size;
-        return this;
-    }
-
-    public ElasticsearchQueryGenerator setSort(XContentBuilder sort) {
-        this.sort = sort;
         return this;
     }
 
@@ -137,16 +132,16 @@ public class ElasticsearchQueryGenerator implements Visitor {
         return this;
     }
 
-    public String getQueryResult() throws IOException {
-        return queryGen.getResult().string();
+    public String getQueryResult() {
+        return queryGen.getResult().build();
     }
 
-    public String getFacetResult() throws IOException {
-        return facetGen.getResult().string();
+    public String getFacetResult() {
+        return facetGen.getResult().build();
     }
 
-    public String getSourceResult() throws IOException {
-        return sourceGen.getResult().string();
+    public String getSourceResult() {
+        return sourceGen.getResult().build();
     }
 
     @Override
@@ -162,7 +157,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
             }
             if (model.hasFilter()) {
                 queryGen.startFiltered();
-            } else if (filterGenerator.getResult().string().length() > 0) {
+            } else if (filterGenerator.getResult().build().length() > 0) {
                 queryGen.startFiltered();
             }
             Node querynode = stack.pop();
@@ -180,11 +175,10 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 filterGen.visit(model.getFilterExpression());
                 filterGen.endFilter();
                 queryGen.end();
-            } else if (filterGenerator.getResult().string().length() > 0) {
+            } else if (filterGenerator.getResult().build().length() > 0) {
                 queryGen.end();
-                DefaultXContentBuilder contentBuilder = (DefaultXContentBuilder) filterGenerator.getResult();
-                byte[] b = contentBuilder.bytes().toBytes();
-                queryGen.getResult().rawField("filter", b, 0, b.length);
+                JsonBuilder contentBuilder = filterGenerator.getResult();
+                queryGen.getResult(). copy(contentBuilder);
                 queryGen.endFiltered();
             }
             if (boostField != null) {
@@ -195,15 +189,13 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 facetGen.visit(model.getFacetExpression());
             }
             queryGen.end();
-            Expression sortnode = model.getSort();
-            SortGenerator sortGen = new SortGenerator();
-            if (sortnode != null) {
+            if (model.getSort() != null) {
+                sortGen = new SortGenerator();
                 sortGen.start();
-                sortGen.visit(sortnode);
+                sortGen.visit(model.getSort());
                 sortGen.end();
-                sort = sortGen.getResult();
             }
-            sourceGen.build(queryGen, from, size, sort, facetGen.getResult());
+            sourceGen.build(queryGen, from, size, sortGen.getResult(), facetGen.getResult());
         } catch (IOException e) {
             throw new SyntaxException("unable to build a valid query from " + node + " , reason: " + e.getMessage(), e);
         }
@@ -326,7 +318,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
                     if (sb.length() > 0) {
                         sb.append('.');
                     }
-                    sb.append(modifier.toString());
+                    sb.append(modifier);
                     modifier = stack.pop();
                 }
                 String modifiable = sb.toString();

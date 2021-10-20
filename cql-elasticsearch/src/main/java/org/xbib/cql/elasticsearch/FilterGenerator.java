@@ -1,7 +1,5 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
-import org.xbib.content.json.JsonXContent;
 import org.xbib.cql.SyntaxException;
 import org.xbib.cql.elasticsearch.ast.Expression;
 import org.xbib.cql.elasticsearch.ast.Modifier;
@@ -10,6 +8,7 @@ import org.xbib.cql.elasticsearch.ast.Node;
 import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
 import org.xbib.cql.util.QuotedStringTokenizer;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
 
@@ -18,10 +17,10 @@ import java.io.IOException;
  */
 public class FilterGenerator implements Visitor {
 
-    private XContentBuilder builder;
+    private final JsonBuilder builder;
 
-    public FilterGenerator() throws IOException {
-        this.builder = JsonXContent.contentBuilder();
+    public FilterGenerator() {
+        this.builder = new JsonBuilder();
     }
 
     public FilterGenerator(QueryGenerator queryGenerator) throws IOException {
@@ -29,33 +28,33 @@ public class FilterGenerator implements Visitor {
     }
 
     public FilterGenerator start() throws IOException {
-        builder.startObject();
+        builder.beginMap();
         return this;
     }
 
     public FilterGenerator end() throws IOException {
-        builder.endObject();
+        builder.endMap();
         return this;
     }
 
     public FilterGenerator startFilter() throws IOException {
-        builder.startObject("filter");
+        builder.beginMap("filter");
         return this;
     }
 
     public FilterGenerator endFilter() throws IOException {
-        builder.endObject();
+        builder.endMap();
         return this;
     }
 
-    public XContentBuilder getResult() throws IOException {
+    public JsonBuilder getResult() {
         return builder;
     }
 
     @Override
     public void visit(Token node) {
         try {
-            builder.value(node.getString());
+            builder.buildValue(node.getString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -64,7 +63,7 @@ public class FilterGenerator implements Visitor {
     @Override
     public void visit(Name node) {
         try {
-            builder.field(node.toString());
+            builder.buildKey(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -73,7 +72,7 @@ public class FilterGenerator implements Visitor {
     @Override
     public void visit(Modifier node) {
         try {
-            builder.value(node.toString());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -82,7 +81,7 @@ public class FilterGenerator implements Visitor {
     @Override
     public void visit(Operator node) {
         try {
-            builder.value(node.toString());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -111,17 +110,18 @@ public class FilterGenerator implements Visitor {
                         case EQUALS: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : "";
-                            builder.startObject(tok2 != null && tok2.isBoundary() ? "prefix" : "term");
-                            builder.field(field, value).endObject();
+                            builder.beginMap(tok2 != null && tok2.isBoundary() ? "prefix" : "term");
+                            builder.field(field, value)
+                                    .endMap();
                             break;
                         }
                         case NOT_EQUALS: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : "";
-                            builder.startObject("not")
-                                    .startObject(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
+                            builder.beginMap("not")
+                                    .beginMap(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
                                     .field(field, value)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case ALL: {
@@ -129,18 +129,18 @@ public class FilterGenerator implements Visitor {
                             String value = arg2 != null ? arg2.toString() : "";
                             boolean phrase = arg2 instanceof Token && ((Token) arg2).isQuoted();
                             if (phrase) {
-                                builder.startArray("and");
+                                builder.beginCollection("and");
                                 QuotedStringTokenizer qst = new QuotedStringTokenizer(value);
                                 while (qst.hasMoreTokens()) {
-                                    builder.startObject().startObject("term")
+                                    builder.beginMap().beginMap("term")
                                             .field(field, qst.nextToken())
-                                            .endObject().endObject();
+                                            .endMap().endMap();
                                 }
-                                builder.endArray();
+                                builder.endCollection();
                             } else {
-                                builder.startObject(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
+                                builder.beginMap(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
                                         .field(field, value)
-                                        .endObject();
+                                        .endMap();
                             }
                             break;
                         }
@@ -149,66 +149,66 @@ public class FilterGenerator implements Visitor {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             if (phrase) {
-                                builder.startArray("or");
+                                builder.beginCollection("or");
                                 QuotedStringTokenizer qst = new QuotedStringTokenizer(value);
                                 while (qst.hasMoreTokens()) {
-                                    builder.startObject().startObject("term")
-                                            .field(field, qst.nextToken()).endObject().endObject();
+                                    builder.beginMap().beginMap("term")
+                                            .field(field, qst.nextToken()).endMap().endMap();
                                 }
-                                builder.endArray();
+                                builder.endCollection();
                             } else {
-                                builder.startObject(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
+                                builder.beginMap(tok2 != null && tok2.isBoundary() ? "prefix" : "term")
                                         .field(field, value)
-                                        .endObject();
+                                        .endMap();
                             }
                             break;
                         }
                         case RANGE_GREATER_THAN: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("from", value)
                                     .field("include_lower", false)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_GREATER_OR_EQUAL: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("from", value)
                                     .field("include_lower", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_LESS_THAN: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("to", value)
                                     .field("include_upper", false)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_LESS_OR_EQUALS: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("range").startObject(field)
+                            builder.beginMap("range").beginMap(field)
                                     .field("to", value)
                                     .field("include_upper", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case RANGE_WITHIN: {
                             String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : "";
                             String[] s = value.split(" ");
-                            builder.startObject("range").startObject(field).
+                            builder.beginMap("range").beginMap(field).
                                     field("from", s[0])
                                     .field("to", s[1])
                                     .field("include_lower", true)
                                     .field("include_upper", true)
-                                    .endObject().endObject();
+                                    .endMap().endMap();
                             break;
                         }
                         case AND: {
@@ -217,18 +217,18 @@ public class FilterGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
-                                builder.startArray("must");
+                                builder.beginMap("bool");
+                                builder.beginCollection("must");
                                 Node[] args = node.getArgs();
                                 for (int i = 0; i < node.getArgs().length; i++) {
                                     if (args[i].isVisible()) {
-                                        builder.startObject();
+                                        builder.beginMap();
                                         args[i].accept(this);
-                                        builder.endObject();
+                                        builder.endMap();
                                     }
                                 }
-                                builder.endArray();
-                                builder.endObject();
+                                builder.endCollection();
+                                builder.endMap();
                             }
                             break;
                         }
@@ -238,51 +238,51 @@ public class FilterGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
-                                builder.startArray("should");
+                                builder.beginMap("bool");
+                                builder.beginCollection("should");
                                 Node[] args = node.getArgs();
                                 for (int i = 0; i < node.getArgs().length; i++) {
                                     if (args[i].isVisible()) {
-                                        builder.startObject();
+                                        builder.beginMap();
                                         args[i].accept(this);
-                                        builder.endObject();
+                                        builder.endMap();
                                     }
                                 }
-                                builder.endArray();
-                                builder.endObject();
+                                builder.endCollection();
+                                builder.endMap();
                             }
                             break;
                         }
                         case OR_FILTER: {
-                            builder.startObject("bool");
-                            builder.startArray("should");
+                            builder.beginMap("bool");
+                            builder.beginCollection("should");
                             Node[] args = node.getArgs();
                             for (int i = 0; i < args.length; i += 2) {
                                 if (args[i].isVisible()) {
-                                    builder.startObject().startObject("term");
+                                    builder.beginMap().beginMap("term");
                                     args[i].accept(this);
                                     args[i + 1].accept(this);
-                                    builder.endObject().endObject();
+                                    builder.endMap().endMap();
                                 }
                             }
-                            builder.endArray();
-                            builder.endObject();
+                            builder.endCollection();
+                            builder.endMap();
                             break;
                         }
                         case AND_FILTER: {
-                            builder.startObject("bool");
-                            builder.startArray("must");
+                            builder.beginMap("bool");
+                            builder.beginCollection("must");
                             Node[] args = node.getArgs();
                             for (int i = 0; i < args.length; i += 2) {
                                 if (args[i].isVisible()) {
-                                    builder.startObject().startObject("term");
+                                    builder.beginMap().beginMap("term");
                                     args[i].accept(this);
                                     args[i + 1].accept(this);
-                                    builder.endObject().endObject();
+                                    builder.endMap().endMap();
                                 }
                             }
-                            builder.endArray();
-                            builder.endObject();
+                            builder.endCollection();
+                            builder.endMap();
                             break;
                         }
                         case ANDNOT: {
@@ -291,18 +291,18 @@ public class FilterGenerator implements Visitor {
                                     arg1.accept(this);
                                 }
                             } else {
-                                builder.startObject("bool");
-                                builder.startArray("must_not");
+                                builder.beginMap("bool");
+                                builder.beginCollection("must_not");
                                 Node[] args = node.getArgs();
                                 for (int i = 0; i < node.getArgs().length; i++) {
                                     if (args[i].isVisible()) {
-                                        builder.startObject();
+                                        builder.beginMap();
                                         args[i].accept(this);
-                                        builder.endObject();
+                                        builder.endMap();
                                     }
                                 }
-                                builder.endArray();
-                                builder.endObject();
+                                builder.endCollection();
+                                builder.endMap();
                             }
                             break;
                         }
@@ -310,19 +310,19 @@ public class FilterGenerator implements Visitor {
                             String field = arg1.toString();
                             // we assume a  default of 10 words is enough for proximity
                             String value = arg2 != null ? arg2.toString() + "~10" : "";
-                            builder.startObject("field").field(field, value).endObject();
+                            builder.beginMap("field").field(field, value).endMap();
                             break;
                         }
                         case TERM_FILTER: {
                             String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
-                            builder.startObject("term").field(field, value).endObject();
+                            builder.beginMap("term").field(field, value).endMap();
                             break;
                         }
                         case QUERY_FILTER: {
-                            builder.startObject("query");
+                            builder.beginMap("query");
                             arg1.accept(this);
-                            builder.endObject();
+                            builder.endMap();
                             break;
                         }
                         default:

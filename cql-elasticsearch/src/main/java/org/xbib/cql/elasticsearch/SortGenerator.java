@@ -1,7 +1,5 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
-import org.xbib.content.json.JsonXContent;
 import org.xbib.cql.SyntaxException;
 import org.xbib.cql.elasticsearch.ast.Expression;
 import org.xbib.cql.elasticsearch.ast.Modifier;
@@ -9,6 +7,7 @@ import org.xbib.cql.elasticsearch.ast.Name;
 import org.xbib.cql.elasticsearch.ast.Node;
 import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
 import java.util.Stack;
@@ -18,24 +17,24 @@ import java.util.Stack;
  */
 public class SortGenerator implements Visitor {
 
-    private final XContentBuilder builder;
+    private final JsonBuilder builder;
 
     private final Stack<Modifier> modifiers;
 
-    public SortGenerator() throws IOException {
-        this.builder = JsonXContent.contentBuilder();
+    public SortGenerator() {
+        this.builder = new JsonBuilder();
         this.modifiers = new Stack<>();
     }
 
     public void start() throws IOException {
-        builder.startArray();
+        builder.beginCollection();
     }
 
     public void end() throws IOException {
-        builder.endArray();
+        builder.endCollection();
     }
 
-    public XContentBuilder getResult() {
+    public JsonBuilder getResult() {
         return builder;
     }
 
@@ -47,15 +46,15 @@ public class SortGenerator implements Visitor {
     public void visit(Name node) {
         try {
             if (modifiers.isEmpty()) {
-                builder.startObject()
-                        .field(node.getName())
-                        .startObject()
+                builder.beginMap()
+                        .buildKey(node.getName())
+                        .beginMap()
                         .field("unmapped_type", "string")
                         .field("missing", "_last")
-                        .endObject()
-                        .endObject();
+                        .endMap()
+                        .endMap();
             } else {
-                builder.startObject().field(node.getName()).startObject();
+                builder.beginMap().buildKey(node.getName()).beginMap();
                 while (!modifiers.isEmpty()) {
                     Modifier mod = modifiers.pop();
                     String s = mod.getName().toString();
@@ -71,15 +70,15 @@ public class SortGenerator implements Visitor {
                             break;
                         }
                         default: {
-                            builder.field(s, mod.getTerm());
+                            builder.field(s, mod.getTerm().toString());
                             break;
                         }
                     }
                 }
                 builder.field("unmapped_type", "string");
                 builder.field("missing", "_last");
-                builder.endObject();
-                builder.endObject();
+                builder.endMap();
+                builder.endMap();
             }
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);

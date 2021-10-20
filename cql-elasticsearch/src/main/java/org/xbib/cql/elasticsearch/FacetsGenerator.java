@@ -1,13 +1,12 @@
 package org.xbib.cql.elasticsearch;
 
-import org.xbib.content.XContentBuilder;
-import org.xbib.content.json.JsonXContent;
 import org.xbib.cql.SyntaxException;
 import org.xbib.cql.elasticsearch.ast.Expression;
 import org.xbib.cql.elasticsearch.ast.Modifier;
 import org.xbib.cql.elasticsearch.ast.Name;
 import org.xbib.cql.elasticsearch.ast.Operator;
 import org.xbib.cql.elasticsearch.ast.Token;
+import org.xbib.datastructures.json.tiny.JsonBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,36 +19,36 @@ public class FacetsGenerator implements Visitor {
 
     private int facetlength = 10;
 
-    private final XContentBuilder builder;
+    private final JsonBuilder builder;
 
     public FacetsGenerator() throws IOException {
-        this.builder = JsonXContent.contentBuilder();
+        this.builder = new JsonBuilder();
     }
 
     public void start() throws IOException {
-        builder.startObject();
+        builder.beginMap();
     }
 
     public void end() throws IOException {
-        builder.endObject();
+        builder.endMap();
     }
 
     public void startFacets() throws IOException {
-        builder.startObject("aggregations");
+        builder.beginMap("aggregations");
     }
 
     public void endFacets() throws IOException {
-        builder.endObject();
+        builder.endMap();
     }
 
-    public XContentBuilder getResult() throws IOException {
+    public JsonBuilder getResult() {
         return builder;
     }
 
     @Override
     public void visit(Token node) {
         try {
-            builder.value(node.toString().getBytes());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -58,7 +57,7 @@ public class FacetsGenerator implements Visitor {
     @Override
     public void visit(Name node) {
         try {
-            builder.value(node.toString().getBytes());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -67,7 +66,7 @@ public class FacetsGenerator implements Visitor {
     @Override
     public void visit(Modifier node) {
         try {
-            builder.value(node.toString().getBytes());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -76,7 +75,7 @@ public class FacetsGenerator implements Visitor {
     @Override
     public void visit(Operator node) {
         try {
-            builder.value(node.toString().getBytes());
+            builder.buildValue(node.toString());
         } catch (IOException e) {
             throw new SyntaxException(e.getMessage(), e);
         }
@@ -88,8 +87,9 @@ public class FacetsGenerator implements Visitor {
             Operator op = node.getOperator();
             switch (op) {
                 case TERMS_FACET: {
-                    builder.startObject().field("myfacet", "myvalue")
-                            .endObject();
+                    builder.beginMap()
+                            .field("myfacet", "myvalue")
+                            .endMap();
                     break;
                 }
                 default:
@@ -122,7 +122,7 @@ public class FacetsGenerator implements Visitor {
                     break;
             }
         }
-        builder.startObject();
+        builder.beginMap();
         for (String index : facetMap.keySet()) {
             if ("*".equals(index)) {
                 continue;
@@ -130,18 +130,19 @@ public class FacetsGenerator implements Visitor {
             // TODO(jprante) range aggregations etc.
             String facetType = "terms";
             Integer size = facetMap.get(index);
-            builder.field(index)
-                    .startObject()
-                    .field(facetType).startObject()
+            builder.buildKey(index)
+                    .beginMap()
+                    .buildKey(facetType)
+                    .beginMap()
                     .field("field", index)
                     .field("size", size > 0 ? size : 10)
-                    .startObject("order")
+                    .beginMap("order")
                     .field(order, dir)
-                    .endObject()
-                    .endObject();
-            builder.endObject();
+                    .endMap()
+                    .endMap();
+            builder.endMap();
         }
-        builder.endObject();
+        builder.endMap();
         return this;
     }
 
