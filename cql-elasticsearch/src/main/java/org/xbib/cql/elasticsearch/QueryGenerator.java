@@ -142,101 +142,131 @@ public class QueryGenerator implements Visitor {
                     if (!visible) {
                         return;
                     }
+                    String field = arg1.toString();
                     switch (op) {
                         case EQUALS: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : ""; // with quote
-                            // with phrase boost
-                            builder.beginMap("bool")
-                                    .beginCollection("should")
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", value)
-                                    .field("fields", Collections.singletonList(field))
-                                    .field("analyze_wildcard", true)
-                                    .field("default_operator", "and")
-                                    .endMap()
-                                    .endMap()
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", "\"" + value + "\"")
-                                    .field("fields", Collections.singletonList(field + "^2"))
-                                    .field("default_operator", "and")
-                                    .endMap()
-                                    .endMap()
-                                    .endCollection()
-                                    .field("minimum_should_match", "1")
-                                    .endMap();
+                            if (field.endsWith("Keyword")) {
+                                // exact search
+                                builder.beginMap()
+                                        .beginMap("term")
+                                        .field(field, value)
+                                        .endMap()
+                                        .endMap();
+                            } else {
+                                // with phrase boost
+                                builder.beginMap("bool")
+                                        .beginCollection("should")
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", value)
+                                        .field("fields", Collections.singletonList(field))
+                                        .field("analyze_wildcard", true)
+                                        .field("default_operator", "and")
+                                        .endMap()
+                                        .endMap()
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", "\"" + value + "\"")
+                                        .field("fields", Collections.singletonList(field + "^2"))
+                                        .field("default_operator", "and")
+                                        .endMap()
+                                        .endMap()
+                                        .endCollection()
+                                        .field("minimum_should_match", "1")
+                                        .endMap();
+                            }
                             break;
                         }
                         case NOT_EQUALS: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : ""; // with quote
-                            builder.beginMap("bool")
-                                    .beginMap("must_not")
-                                    .beginMap("simple_query_string")
-                                    .field("query", value)
-                                    .field("fields", Collections.singletonList(field))
-                                    .field("analyze_wildcard", true)
-                                    .field("default_operator", "and")
-                                    .endMap()
-                                    .endMap()
-                                    .endMap();
+                            if (field.endsWith("Keyword")) {
+                                // exact search
+                                builder.beginMap("bool")
+                                        .beginMap("must_not")
+                                        .beginMap("term")
+                                        .field(field, value)
+                                        .endMap()
+                                        .endMap()
+                                        .endMap();
+                            } else {
+                                builder.beginMap("bool")
+                                        .beginMap("must_not")
+                                        .beginMap("simple_query_string")
+                                        .field("query", value)
+                                        .field("fields", Collections.singletonList(field))
+                                        .field("analyze_wildcard", true)
+                                        .field("default_operator", "and")
+                                        .endMap()
+                                        .endMap()
+                                        .endMap();
+                            }
                             break;
                         }
                         case ALL: {
-                            String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
-                            // with phrase boost
-                            builder.beginMap("bool")
-                                    .beginCollection("should")
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", value)
-                                    .field("fields", Collections.singletonList(field))
-                                    .field("analyze_wildcard", true)
-                                    .field("default_operator", "and")
-                                    .endMap()
-                                    .endMap()
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", "\"" + value + "\"")
-                                    .field("fields", Collections.singletonList(field + "^2"))
-                                    .field("default_operator", "and")
-                                    .endMap()
-                                    .endMap()
-                                    .endCollection()
-                                    .field("minimum_should_match", "1")
-                                    .endMap();
+                            if (field.endsWith("Keyword")) {
+                                // exact search
+                                builder.beginMap("term")
+                                        .field(field, value)
+                                        .endMap();
+                            } else {
+                                // with phrase boost
+                                builder.beginMap("bool")
+                                        .beginCollection("should")
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", value)
+                                        .field("fields", Collections.singletonList(field))
+                                        .field("analyze_wildcard", true)
+                                        .field("default_operator", "and")
+                                        .endMap()
+                                        .endMap()
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", "\"" + value + "\"")
+                                        .field("fields", Collections.singletonList(field + "^2"))
+                                        .field("default_operator", "and")
+                                        .endMap()
+                                        .endMap()
+                                        .endCollection()
+                                        .field("minimum_should_match", "1")
+                                        .endMap();
+                            }
                             break;
                         }
                         case ANY: {
-                            String field = arg1.toString();
                             String value = tok2 != null ? tok2.getString() : ""; // always unquoted
-                            // with phrase boost
-                            builder.beginMap("bool")
-                                    .beginCollection("should")
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", value)
-                                    .field("fields", Collections.singletonList(field))
-                                    .field("analyze_wildcard", true)
-                                    .endMap()
-                                    .endMap()
-                                    .beginMap()
-                                    .beginMap("simple_query_string")
-                                    .field("query", "\"" + value + "\"")
-                                    .field("fields", Collections.singletonList(field + "^2"))
-                                    .endMap()
-                                    .endMap()
-                                    .endCollection()
-                                    .field("minimum_should_match", "1")
-                                    .endMap();
+                            if (field.endsWith("Keyword")) {
+                                // exact search
+                                builder.beginMap("term")
+                                        .field(field, value)
+                                        .endMap();
+                            } else {
+                                // with phrase boost
+                                builder.beginMap("bool")
+                                        .beginCollection("should")
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", value)
+                                        .field("fields", Collections.singletonList(field))
+                                        .field("analyze_wildcard", true)
+                                        .endMap()
+                                        .endMap()
+                                        .beginMap()
+                                        .beginMap("simple_query_string")
+                                        .field("query", "\"" + value + "\"")
+                                        .field("fields", Collections.singletonList(field + "^2"))
+                                        .endMap()
+                                        .endMap()
+                                        .endCollection()
+                                        .field("minimum_should_match", "1")
+                                        .endMap();
+                            }
                             break;
                         }
                         case PHRASE: {
                             if (tok2 != null) {
-                                String field = arg1.toString();
                                 String value = tok2.isQuoted() ? tok2.getString() : arg2.toString();
                                 if (tok2.isAll()) {
                                     builder.beginMap("match_all").endMap();
@@ -245,18 +275,24 @@ public class QueryGenerator implements Visitor {
                                 } else if (tok2.isBoundary()) {
                                     builder.beginMap("prefix").field(field, value).endMap();
                                 } else {
-                                    builder.beginMap("simple_query_string")
-                                            .field("query", value)
-                                            .field("fields",Collections.singletonList(field))
-                                            .field("analyze_wildcard", true)
-                                            .field("default_operator", "and")
-                                            .endMap();
+                                    if (field.endsWith("Keyword")) {
+                                        // exact search
+                                        builder.beginMap("term")
+                                                .field(field, value)
+                                                .endMap();
+                                    } else {
+                                        builder.beginMap("simple_query_string")
+                                                .field("query", value)
+                                                .field("fields", Collections.singletonList(field))
+                                                .field("analyze_wildcard", true)
+                                                .field("default_operator", "and")
+                                                .endMap();
+                                    }
                                 }
                             }
                             break;
                         }
                         case RANGE_GREATER_THAN: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             builder.beginMap("range").beginMap(field)
                                     .field("from", value)
@@ -265,7 +301,6 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         case RANGE_GREATER_OR_EQUAL: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             builder.beginMap("range").beginMap(field)
                                     .field("from", value)
@@ -274,7 +309,6 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         case RANGE_LESS_THAN: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             builder.beginMap("range").beginMap(field)
                                     .field("to", value)
@@ -283,7 +317,6 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         case RANGE_LESS_OR_EQUALS: {
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             builder.beginMap("range").beginMap(field)
                                     .field("to", value)
@@ -293,7 +326,6 @@ public class QueryGenerator implements Visitor {
                         }
                         case RANGE_WITHIN: {
                             // borders are inclusive
-                            String field = arg1.toString();
                             String value = arg2 != null ? arg2.toString() : "";
                             String from = null;
                             String to = null;
@@ -397,7 +429,6 @@ public class QueryGenerator implements Visitor {
                             break;
                         }
                         case PROX: {
-                            String field = arg1.toString();
                             // we assume a default of 10 words is enough for proximity
                             String value = arg2 != null ? arg2 + "~10" : "";
                             builder.beginMap("field").field(field, value).endMap();
