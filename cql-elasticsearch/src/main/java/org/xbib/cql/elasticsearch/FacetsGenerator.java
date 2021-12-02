@@ -17,8 +17,6 @@ import java.util.Map;
  */
 public class FacetsGenerator implements Visitor {
 
-    private int facetlength = 10;
-
     private final JsonBuilder builder;
 
     public FacetsGenerator() throws IOException {
@@ -93,19 +91,18 @@ public class FacetsGenerator implements Visitor {
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException(
-                            "unable to translate operator while building elasticsearch facet: " + op);
+                    throw new IllegalArgumentException("unable to translate operator while building elasticsearch facet: " + op);
             }
         } catch (IOException e) {
             throw new SyntaxException("internal error while building elasticsearch query", e);
         }
     }
 
-    public FacetsGenerator facet(String facetLimit, String facetSort) throws IOException {
+    public void facet(String facetLimit, String facetSort) throws IOException {
         if (facetLimit == null) {
-            return this;
+            return;
         }
-        Map<String, Integer> facetMap = parseFacet(facetLimit);
+        Map<String, Integer> facetMap = parseFacet(facetLimit, 10);
         String[] sortSpec = facetSort != null ? facetSort.split(",") : new String[]{"recordCount", "descending"};
         String order = "_count";
         String dir = "desc";
@@ -143,12 +140,11 @@ public class FacetsGenerator implements Visitor {
             builder.endMap();
         }
         builder.endMap();
-        return this;
     }
 
-    private Map<String, Integer> parseFacet(String spec) {
-        Map<String, Integer> m = new HashMap<String, Integer>();
-        m.put("*", facetlength);
+    private Map<String, Integer> parseFacet(String spec, int defaultFacetLimit) {
+        Map<String, Integer> m = new HashMap<>();
+        m.put("*", defaultFacetLimit);
         if (spec == null || spec.length() == 0) {
             return m;
         }
@@ -156,10 +152,10 @@ public class FacetsGenerator implements Visitor {
         for (String param : params) {
             int pos = param.indexOf(':');
             if (pos > 0) {
-                int n = parseInt(param.substring(0, pos), facetlength);
+                int n = parseInt(param.substring(0, pos), defaultFacetLimit);
                 m.put(param.substring(pos + 1), n);
             } else if (param.length() > 0) {
-                int n = parseInt(param, facetlength);
+                int n = parseInt(param, defaultFacetLimit);
                 m.put("*", n);
             }
         }

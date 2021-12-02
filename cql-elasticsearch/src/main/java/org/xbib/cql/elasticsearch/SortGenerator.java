@@ -49,7 +49,7 @@ public class SortGenerator implements Visitor {
                 builder.beginMap()
                         .buildKey(node.getName())
                         .beginMap()
-                        .field("unmapped_type", "string")
+                        .field("ignore_unmapped", "true")
                         .field("missing", "_last")
                         .endMap()
                         .endMap();
@@ -75,7 +75,7 @@ public class SortGenerator implements Visitor {
                         }
                     }
                 }
-                builder.field("unmapped_type", "string");
+                builder.field("ignore_unmapped", "true");
                 builder.field("missing", "_last");
                 builder.endMap();
                 builder.endMap();

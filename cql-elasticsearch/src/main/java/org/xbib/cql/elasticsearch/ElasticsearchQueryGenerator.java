@@ -42,7 +42,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private final ElasticsearchQueryModel model;
 
-    private final ElasticsearchFilterGenerator filterGenerator;
+    private final ElasticsearchFilterGenerator elasticsearchFilterGenerator;
 
     private final Stack<Node> stack;
 
@@ -62,30 +62,33 @@ public class ElasticsearchQueryGenerator implements Visitor {
 
     private final QueryGenerator queryGen;
 
-    private FilterGenerator filterGen;
+    private final FacetsGenerator facetGen;
 
-    private FacetsGenerator facetGen;
-
-    private SortGenerator sortGen;
+    private final SortGenerator sortGen;
 
     private final String globalField;
 
+    private FilterGenerator filterGen;
+
     public ElasticsearchQueryGenerator(String globalField) throws IOException {
+        this(globalField, new SourceGenerator(), new QueryGenerator(), new FacetsGenerator(), new SortGenerator());
+    }
+
+    public ElasticsearchQueryGenerator(String globalField,
+                                       SourceGenerator sourceGen,
+                                       QueryGenerator queryGen,
+                                       FacetsGenerator facetGen,
+                                       SortGenerator sortGen) throws IOException {
         this.globalField = globalField;
         this.from = 0;
         this.size = 10;
         this.model = new ElasticsearchQueryModel();
-        this.filterGenerator = new ElasticsearchFilterGenerator(globalField, model);
+        this.elasticsearchFilterGenerator = new ElasticsearchFilterGenerator(globalField, model);
         this.stack = new Stack<>();
-        this.sourceGen = new SourceGenerator();
-        this.queryGen = new QueryGenerator();
-        this.filterGen = new FilterGenerator();
-        this.facetGen = new FacetsGenerator();
-        this.sortGen = new SortGenerator();
-    }
-
-    public ElasticsearchQueryModel getModel() {
-        return model;
+        this.sourceGen = sourceGen != null ? sourceGen : new SourceGenerator();
+        this.queryGen = queryGen != null ? queryGen : new QueryGenerator();
+        this.facetGen = facetGen != null ? facetGen : new FacetsGenerator();
+        this.sortGen = sortGen != null ? sortGen : new SortGenerator();
     }
 
     public ElasticsearchQueryGenerator setFrom(int from) {
@@ -109,17 +112,17 @@ public class ElasticsearchQueryGenerator implements Visitor {
     public ElasticsearchQueryGenerator filter(String filter) {
         CQLParser parser = new CQLParser(filter);
         parser.parse();
-        parser.getCQLQuery().accept(filterGenerator);
+        parser.getCQLQuery().accept(elasticsearchFilterGenerator);
         return this;
     }
 
     public ElasticsearchQueryGenerator andfilter(String filterKey, Collection<String> filterValues) {
-        filterGenerator.addAndFilter(filterKey, filterValues);
+        elasticsearchFilterGenerator.addAndFilter(filterKey, filterValues);
         return this;
     }
 
     public ElasticsearchQueryGenerator orfilter(String filterKey, Collection<String> filterValues) {
-        filterGenerator.addOrFilter(filterKey, filterValues);
+        elasticsearchFilterGenerator.addOrFilter(filterKey, filterValues);
         return this;
     }
 
@@ -132,12 +135,25 @@ public class ElasticsearchQueryGenerator implements Visitor {
         return this;
     }
 
+    public ElasticsearchQueryModel getModel() {
+        return model;
+    }
+
+
     public String getQueryResult() {
         return queryGen.getResult().build();
     }
 
+    public String getFilterResult() {
+        return filterGen != null ? filterGen.getResult().build() : null;
+    }
+
     public String getFacetResult() {
         return facetGen.getResult().build();
+    }
+
+    public String getSortRequest() {
+        return sortGen.getResult().build();
     }
 
     public String getSourceResult() {
@@ -157,7 +173,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
             }
             if (model.hasFilter()) {
                 queryGen.startFiltered();
-            } else if (filterGenerator.getResult().build().length() > 0) {
+            } else if (elasticsearchFilterGenerator.getResult().build().length() > 0) {
                 queryGen.startFiltered();
             }
             Node querynode = stack.pop();
@@ -175,9 +191,9 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 filterGen.visit(model.getFilterExpression());
                 filterGen.endFilter();
                 queryGen.end();
-            } else if (filterGenerator.getResult().build().length() > 0) {
+            } else if (elasticsearchFilterGenerator.getResult().build().length() > 0) {
                 queryGen.end();
-                JsonBuilder contentBuilder = filterGenerator.getResult();
+                JsonBuilder contentBuilder = elasticsearchFilterGenerator.getResult();
                 queryGen.getResult(). copy(contentBuilder);
                 queryGen.endFiltered();
             }
@@ -185,12 +201,11 @@ public class ElasticsearchQueryGenerator implements Visitor {
                 queryGen.endBoost();
             }
             if (model.hasFacets()) {
-                facetGen = new FacetsGenerator();
                 facetGen.visit(model.getFacetExpression());
             }
             queryGen.end();
             if (model.getSort() != null) {
-                sortGen = new SortGenerator();
+                //sortGen = new SortGenerator();
                 sortGen.start();
                 sortGen.visit(model.getSort());
                 sortGen.end();
