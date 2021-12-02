@@ -20,7 +20,7 @@ public class QueryGenerator implements Visitor {
     private final JsonBuilder builder;
 
     public QueryGenerator() {
-        this.builder = new JsonBuilder();
+        this.builder = JsonBuilder.builder();
     }
 
     public void start() throws IOException {

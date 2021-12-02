@@ -9,7 +9,7 @@ public class SourceGenerator {
     private final JsonBuilder builder;
 
     public SourceGenerator() throws IOException {
-        this.builder = new JsonBuilder();
+        this.builder = JsonBuilder.builder();
     }
 
     public void build(QueryGenerator query) throws IOException {

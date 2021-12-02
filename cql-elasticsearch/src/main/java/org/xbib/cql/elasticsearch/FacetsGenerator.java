@@ -22,7 +22,7 @@ public class FacetsGenerator implements Visitor {
     private final JsonBuilder builder;
 
     public FacetsGenerator() throws IOException {
-        this.builder = new JsonBuilder();
+        this.builder = JsonBuilder.builder();
     }
 
     public void start() throws IOException {

@@ -22,7 +22,7 @@ public class SortGenerator implements Visitor {
     private final Stack<Modifier> modifiers;
 
     public SortGenerator() {
-        this.builder = new JsonBuilder();
+        this.builder = JsonBuilder.builder();
         this.modifiers = new Stack<>();
     }
 

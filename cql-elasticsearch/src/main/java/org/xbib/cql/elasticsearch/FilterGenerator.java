@@ -20,7 +20,7 @@ public class FilterGenerator implements Visitor {
     private final JsonBuilder builder;
 
     public FilterGenerator() {
-        this.builder = new JsonBuilder();
+        this.builder = JsonBuilder.builder();
     }
 
     public FilterGenerator(QueryGenerator queryGenerator) throws IOException {
