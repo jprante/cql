@@ -13,6 +13,9 @@ public class FacetBreadcrumbTrail<V> extends TreeSet<Facet<V>> {
 
     private static final long serialVersionUID = 6268000598739081048L;
 
+    public FacetBreadcrumbTrail() {
+    }
+
     @Override
     public String toString() {
         return toCQL();

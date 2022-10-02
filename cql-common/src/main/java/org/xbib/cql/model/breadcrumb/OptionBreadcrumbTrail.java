@@ -15,6 +15,9 @@ public class OptionBreadcrumbTrail<V> extends TreeSet<Option<V>> {
 
     private static final long serialVersionUID = -3426025113354994279L;
 
+    public OptionBreadcrumbTrail() {
+    }
+
     @Override
     public String toString() {
         return toCQL();

@@ -1,4 +1,4 @@
 dependencies {
     api project(':cql-common')
-    implementation "org.xbib:datastructures-json-tiny:${project.property('xbib-datastructures.version')}"
+    implementation libs.datastructures.json
 }

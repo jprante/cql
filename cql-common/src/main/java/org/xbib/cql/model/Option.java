@@ -9,7 +9,11 @@ import org.xbib.cql.QueryOption;
 public class Option<V> implements QueryOption<V>, Comparable<Option<V>> {
 
     private String name;
+
     private V value;
+
+    public Option() {
+    }
 
     @Override
     public void setName(String name) {

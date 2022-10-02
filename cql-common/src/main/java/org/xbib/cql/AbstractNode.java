@@ -5,6 +5,9 @@ package org.xbib.cql;
  */
 public abstract class AbstractNode implements Node {
 
+    public AbstractNode() {
+    }
+
     /**
      * Try to accept this node by a visitor.
      *
