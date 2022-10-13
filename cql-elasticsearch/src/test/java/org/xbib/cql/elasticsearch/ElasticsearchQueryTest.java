@@ -20,7 +20,7 @@ class ElasticsearchQueryTest {
     }
 
     @Test
-    void testSimpleTermFilter() throws Exception {
+    void testSimpleTermFilter() {
         String cql = "Jörg";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -31,7 +31,7 @@ class ElasticsearchQueryTest {
     }
 
     @Test
-    void testFieldTermFilter() throws Exception {
+    void testFieldTermFilter() {
         String cql = "dc.type = electronic";
         CQLParser parser = new CQLParser(cql);
         parser.parse();
@@ -78,7 +78,7 @@ class ElasticsearchQueryTest {
         generator.setBoostParams("boost", "log2p", 2.0f, "sum");
         parser.getCQLQuery().accept(generator);
         String json = generator.getSourceResult();
-        assertEquals("{\"from\":0,\"size\":10,\"query\":{\"function_score\":{\"field_value_factor\":{\"field\":\"boost\",\"modifier\":\"log2p\",\"factor\":2.0},\"boost_mode\":\"sum\",\"query\":{\"bool\":{\"should\":[{\"simple_query_string\":{\"query\":\"Jörg\",\"fields\":[\"cql.allIndexes\"],\"analyze_wildcard\":true,\"default_operator\":\"and\"}},{\"simple_query_string\":{\"query\":\"\\\"Jörg\\\"\",\"fields\":[\"cql.allIndexes^2\"],\"default_operator\":\"and\"}}],\"minimum_should_match\":\"1\"}}}}}",
+        assertEquals("{\"from\":0,\"size\":10,\"query\":{\"function_score\":{\"field_value_factor\":{\"field\":\"boost\",\"modifier\":\"log2p\",\"factor\":2.0},\"boost_mode\":\"sum\",\"query\":{\"simple_query_string\":{\"query\":\"Jörg\",\"fields\":[\"cql.allIndexes\"],\"analyze_wildcard\":true,\"default_operator\":\"and\"}}}}}",
                 json);
     }
 
@@ -90,7 +90,19 @@ class ElasticsearchQueryTest {
         ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator("cql.allIndexes");
         parser.getCQLQuery().accept(generator);
         String json = generator.getSourceResult();
-        assertEquals("{\"from\":0,\"size\":10,\"query\":{\"bool\":{\"should\":[{\"simple_query_string\":{\"query\":\"book*\",\"fields\":[\"dc.format\"],\"analyze_wildcard\":true,\"default_operator\":\"and\"}},{\"simple_query_string\":{\"query\":\"\\\"book*\\\"\",\"fields\":[\"dc.format^2\"],\"default_operator\":\"and\"}}],\"minimum_should_match\":\"1\"}}}",
+        assertEquals("{\"from\":0,\"size\":10,\"query\":{\"simple_query_string\":{\"query\":\"book*\",\"fields\":[\"dc.format\"],\"analyze_wildcard\":true,\"default_operator\":\"and\"}}}",
+                json);
+    }
+
+    @Test
+    void testPhrase() throws Exception {
+        String cql = "bib.title = \"Summer fever\"";
+        CQLParser parser = new CQLParser(cql);
+        parser.parse();
+        ElasticsearchQueryGenerator generator = new ElasticsearchQueryGenerator("cql.allIndexes");
+        parser.getCQLQuery().accept(generator);
+        String json = generator.getSourceResult();
+        assertEquals("{\"from\":0,\"size\":10,\"query\":{\"simple_query_string\":{\"query\":\"\\\"Summer fever\\\"\",\"fields\":[\"bib.title\"],\"analyze_wildcard\":true,\"default_operator\":\"and\"}}}",
                 json);
     }
 
@@ -106,7 +118,9 @@ class ElasticsearchQueryTest {
                 try {
                     int pos = line.indexOf('|');
                     if (pos > 0) {
-                        validate(line.substring(0, pos), line.substring(pos + 1));
+                        String cql = line.substring(0, pos);
+                        String expected = line.substring(pos + 1);
+                        validate(cql, expected);
                         ok++;
                     }
                 } catch (Exception e) {
@@ -129,6 +143,6 @@ class ElasticsearchQueryTest {
         parser.getCQLQuery().accept(generator);
         String elasticsearchQuery = generator.getSourceResult();
         assertEquals(expected, elasticsearchQuery);
+        //System.out.println(cql + "|" + elasticsearchQuery);
     }
-
 }

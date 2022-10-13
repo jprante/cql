@@ -71,14 +71,19 @@ public class ElasticsearchQueryGenerator implements Visitor {
     private FilterGenerator filterGen;
 
     public ElasticsearchQueryGenerator(String globalField) throws IOException {
-        this(globalField, new SourceGenerator(), new QueryGenerator(), new FacetsGenerator(), new SortGenerator());
+        this(globalField, false);
+    }
+
+    public ElasticsearchQueryGenerator(String globalField, boolean phraseBoostHint) throws IOException {
+        this(globalField, new SourceGenerator(), new QueryGenerator(), new FacetsGenerator(), new SortGenerator(), phraseBoostHint);
     }
 
     public ElasticsearchQueryGenerator(String globalField,
                                        SourceGenerator sourceGen,
                                        QueryGenerator queryGen,
                                        FacetsGenerator facetGen,
-                                       SortGenerator sortGen) throws IOException {
+                                       SortGenerator sortGen,
+                                       boolean phraseBoostHint) throws IOException {
         this.globalField = globalField;
         this.from = 0;
         this.size = 10;
@@ -89,6 +94,7 @@ public class ElasticsearchQueryGenerator implements Visitor {
         this.queryGen = queryGen != null ? queryGen : new QueryGenerator();
         this.facetGen = facetGen != null ? facetGen : new FacetsGenerator();
         this.sortGen = sortGen != null ? sortGen : new SortGenerator();
+        this.queryGen.setPhraseBoostHint(phraseBoostHint);
     }
 
     public ElasticsearchQueryGenerator setFrom(int from) {

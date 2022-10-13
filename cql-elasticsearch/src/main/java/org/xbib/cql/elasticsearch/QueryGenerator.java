@@ -19,8 +19,14 @@ public class QueryGenerator implements Visitor {
 
     private final JsonBuilder builder;
 
+    private boolean phraseBoostHint;
+
     public QueryGenerator() {
         this.builder = JsonBuilder.builder();
+    }
+
+    public void setPhraseBoostHint(boolean phraseBoostHint) {
+        this.phraseBoostHint = phraseBoostHint;
     }
 
     public void start() throws IOException {
@@ -154,27 +160,37 @@ public class QueryGenerator implements Visitor {
                                         .endMap()
                                         .endMap();
                             } else {
-                                // with phrase boost
-                                builder.beginMap("bool")
-                                        .beginCollection("should")
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", value)
-                                        .field("fields", Collections.singletonList(field))
-                                        .field("analyze_wildcard", true)
-                                        .field("default_operator", "and")
-                                        .endMap()
-                                        .endMap()
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", "\"" + value + "\"")
-                                        .field("fields", Collections.singletonList(field + "^2"))
-                                        .field("default_operator", "and")
-                                        .endMap()
-                                        .endMap()
-                                        .endCollection()
-                                        .field("minimum_should_match", "1")
-                                        .endMap();
+                                if (phraseBoostHint) {
+                                    // with phrase boost
+                                    builder.beginMap("bool")
+                                            .beginCollection("should")
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
+                                            .endMap()
+                                            .endMap()
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", "\"" + value + "\"")
+                                            .field("fields", Collections.singletonList(field + "^2"))
+                                            .field("default_operator", "and")
+                                            .endMap()
+                                            .endMap()
+                                            .endCollection()
+                                            .field("minimum_should_match", "1")
+                                            .endMap();
+                                } else {
+                                    // without phrase boost hint
+                                    builder.beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
+                                            .endMap();
+                                }
                             }
                             break;
                         }
@@ -211,27 +227,36 @@ public class QueryGenerator implements Visitor {
                                         .field(field, value)
                                         .endMap();
                             } else {
-                                // with phrase boost
-                                builder.beginMap("bool")
-                                        .beginCollection("should")
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", value)
-                                        .field("fields", Collections.singletonList(field))
-                                        .field("analyze_wildcard", true)
-                                        .field("default_operator", "and")
-                                        .endMap()
-                                        .endMap()
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", "\"" + value + "\"")
-                                        .field("fields", Collections.singletonList(field + "^2"))
-                                        .field("default_operator", "and")
-                                        .endMap()
-                                        .endMap()
-                                        .endCollection()
-                                        .field("minimum_should_match", "1")
-                                        .endMap();
+                                if (phraseBoostHint) {
+                                    // with phrase boost
+                                    builder.beginMap("bool")
+                                            .beginCollection("should")
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
+                                            .endMap()
+                                            .endMap()
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", "\"" + value + "\"")
+                                            .field("fields", Collections.singletonList(field + "^2"))
+                                            .field("default_operator", "and")
+                                            .endMap()
+                                            .endMap()
+                                            .endCollection()
+                                            .field("minimum_should_match", "1")
+                                            .endMap();
+                                } else {
+                                    builder.beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
+                                            .endMap();
+                                }
                             }
                             break;
                         }
@@ -243,25 +268,34 @@ public class QueryGenerator implements Visitor {
                                         .field(field, value)
                                         .endMap();
                             } else {
-                                // with phrase boost
-                                builder.beginMap("bool")
-                                        .beginCollection("should")
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", value)
-                                        .field("fields", Collections.singletonList(field))
-                                        .field("analyze_wildcard", true)
-                                        .endMap()
-                                        .endMap()
-                                        .beginMap()
-                                        .beginMap("simple_query_string")
-                                        .field("query", "\"" + value + "\"")
-                                        .field("fields", Collections.singletonList(field + "^2"))
-                                        .endMap()
-                                        .endMap()
-                                        .endCollection()
-                                        .field("minimum_should_match", "1")
-                                        .endMap();
+                                if (phraseBoostHint) {
+                                    // with phrase boost
+                                    builder.beginMap("bool")
+                                            .beginCollection("should")
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .endMap()
+                                            .endMap()
+                                            .beginMap()
+                                            .beginMap("simple_query_string")
+                                            .field("query", "\"" + value + "\"")
+                                            .field("fields", Collections.singletonList(field + "^2"))
+                                            .endMap()
+                                            .endMap()
+                                            .endCollection()
+                                            .field("minimum_should_match", "1")
+                                            .endMap();
+                                } else {
+                                    builder.beginMap("simple_query_string")
+                                            .field("query", value)
+                                            .field("fields", Collections.singletonList(field))
+                                            .field("analyze_wildcard", true)
+                                            .field("default_operator", "and")
+                                            .endMap();
+                                }
                             }
                             break;
                         }
