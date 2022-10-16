@@ -1,12 +1,5 @@
 # xbib Contextual Query Language Compiler for Java
 
-image:https://api.travis-ci.org/xbib/cql.svg[title="Build status", link="https://travis-ci.org/xbib/cql/"]
-image:https://img.shields.io/sonar/http/nemo.sonarqube.com/org.xbib%3Acql/coverage.svg?style=flat-square[title="Coverage", link="https://sonarqube.com/dashboard/index?id=org.xbib%3Acql"]
-image:https://maven-badges.herokuapp.com/maven-central/org.xbib/cql/badge.svg[title="Maven Central", link="http://search.maven.org/#search%7Cga%7C1%7Cxbib%20cql"]
-image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[title="Apache License 2.0", link="https://opensource.org/licenses/Apache-2.0"]
-image:https://img.shields.io/twitter/url/https/twitter.com/xbib.svg?style=social&label=Follow%20%40xbib[title="Twitter", link="https://twitter.com/xbib"]
-
-
 CQL, the Contextual Query Language, is a formal language for representing queries to information retrieval systems.
 Its objective is to combine simplicity with expressiveness, to accommodate the range of complexity from
 very simple queries to very complex. CQL queries are intended to be human readable and writable, intuitive,
@@ -19,7 +12,7 @@ It also support extensive query options, filter queries and faceting, with bread
 More about CQL can be found under
 link:http://docs.oasis-open.org/search-ws/searchRetrieve/v1.0/os/part5-cql/searchRetrieve-v1.0-os-part5-cql.html[the searchRetrieve 1.0 CQL specification].
 
-== License
+## License
 
 Copyright (C) 2012 Jörg Prante
 
