@@ -14,7 +14,7 @@ link:http://docs.oasis-open.org/search-ws/searchRetrieve/v1.0/os/part5-cql/searc
 
 ## License
 
-Copyright (C) 2012 Jörg Prante
+Copyright (C) 2012-2022 Jörg Prante
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
