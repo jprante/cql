@@ -15,8 +15,8 @@ pluginManagement {
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
-            version('gradle', '8.4')
-            version('datastructures', '5.0.5')
+            version('gradle', '8.5')
+            version('datastructures', '5.0.6')
             library('datastructures-json', 'org.xbib', 'datastructures-json-tiny').versionRef('datastructures')
         }
         testLibs {
